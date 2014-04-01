@@ -1,0 +1,108 @@
+# nuc.freqs.R
+#
+# __author__ = 'Jay Hesselberth'
+# __contact__ = 'jay.hesselberth@gmail.com'
+# __version__ = '$Revision: 559 $'
+#
+# modmap pipeline for plotting nucleotide frequencies 
+
+library(ggplot2)
+library(RColorBrewer)
+library(Cairo)
+
+# get the filename
+output = commandArgs(trailingOnly=TRUE)
+if (length(output) != 4) {
+   stop("usage: Rscript nuc.freq.R infile sample.name plot.type output.dir")
+}
+
+infile = output[1]
+sample.name = output[2]
+plot.type = output[3]
+output.dir = output[4]
+
+# set up the plot type
+if (plot.type == 'hist') {
+    hist=TRUE
+    scatter=FALSE
+} else if (plot.type == 'scatter') {
+    hist = FALSE
+    scatter = TRUE
+} else {
+    stop("plot type is either 'hist' or 'scatter'")
+}
+
+COLNAMES <- c('nuc','offset','size','count','freq')
+df <- read.table(infile, col.names=COLNAMES)
+
+if (nrow(df) == 0) {
+    warning("empty data frame")
+    quit(status=0)
+}
+head(df)
+
+ggplot.nuc.freq <- function(df, cur.size,
+    hist = hist, 
+    scatter = scatter, ... ) {
+
+    # subset the data
+    df.subset <- subset(df, region.size == cur.size)
+
+    gp.freq <- ggplot(data = df.subset,
+                     aes(nuc, freq, offset))
+
+    if (hist) {
+        gp.freq <- gp.freq + geom_bar(stat = 'identity', aes(fill = factor(nuc)))
+        gp.freq <- gp.freq + facet_grid(. ~ offset)
+        gp.freq <- gp.freq + theme(legend.position = 'none')
+    }
+    else if (scatter) {
+        gp.freq <- gp.freq + geom_line(aes(color=factor(nuc), x = offset,
+                                       y = freq))
+                           + geom_point(aes(x=offset, y=freq, 
+                                        color=factor(nuc),size=3))
+    }
+
+    gp.freq <- gp.freq + theme_bw()
+
+    # adjust x labels if number of labels is too high
+    if (length(unique(df.subset$nuc)) > 4) {
+        gp.freq <- gp.freq + 
+                   theme(axis.text.x = element_text(angle=90, size=6))
+    }
+
+    # axis labels 
+    if (hist) {
+        gp.freq <- gp.freq + xlab('Nucleotides')
+    } else if (scatter) {
+        gp.freq <- gp.freq + xlab('Position')
+    }    
+    gp.freq <- gp.freq + ylab('Frequency')
+
+    # add title
+    title.top = paste('modmap nucleotide-frequency (sample ',
+                      sample.name, ' region size ', cur.size, ')', sep='')
+    title.bottom = "Register 0 is modified base. Negative numbers are 5'"
+    title = paste(title.top, title.bottom, sep='\n')
+    gp.freq <- gp.freq + ggtitle(title)
+
+    return(gp.freq)
+}
+
+uniq.sizes = unique(df$size)
+
+for (idx in 1:length(uniq.sizes)) {
+
+    cur.size <- uniq.sizes[idx]
+
+    gp.nuc.freq <- ggplot.nuc.freq(df, cur.size, hist=hist,
+                                   scatter=scatter)
+
+    # write the file
+    pdf.filename <- paste(output.dir, '/', 'modmap.nuc.freq.region.',
+                          cur.size, '.', sample.name, '.pdf', sep='')
+
+    ggsave(filename = pdf.filename, 
+           plot = gp.nuc.freq,
+           device = CairoPDF)
+}

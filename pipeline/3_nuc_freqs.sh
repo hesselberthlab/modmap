@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+#BSUB -J nuc.freqs[1-7]
+#BSUB -e nuc.freqs.%J.%I.err
+#BSUB -o nuc.freqs.%J.%I.out
+#BSUB -q normal
+#BSUB -P storici
+
+<<DOC
+Calculate nucleotide frequencies
+DOC
+
+set -o nounset -o pipefail -o errexit -x
+
+source $HOME/projects/collab/storici-lab/bin/config.sh
+sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
+
+# mono, di and trinucleotides
+sizes="1 2 3"
+
+if [[ $ASSEMBLY == "sacCer2" ]]; then
+    ignore_modes=("all" "only-mito" "no-mito" "only-2micron")
+    ignore_args=("" "--only-chrom chrM"
+                 "--ignore-chrom chrM"
+                 "--only-chrom 2micron")
+else
+    ignore_modes=("all" "only-mito" "no-mito")
+    ignore_args=("" "--only-chrom chrM"
+                 "--ignore-chrom chrM")
+fi
+
+bedgraphs=$RESULT/$sample/bedgraphs
+results=$RESULT/$sample/nuc_freqs
+
+if [[ ! -d $results ]]; then
+    mkdir -p $results
+fi
+
+for aln_idx in ${!ALIGN_MODES[@]}; do
+    align_mode=${ALIGN_MODES[$aln_idx]}
+
+    posbedgraph=$bedgraphs/$sample.align.$align_mode.strand.pos.counts.bg
+    negbedgraph=$bedgraphs/$sample.align.$align_mode.strand.neg.counts.bg
+
+    for ig_idx in ${!ignore_modes[@]}; do
+
+        ignore_mode=${ignore_modes[$ig_idx]}
+        ignore_arg=${ignore_args[$ig_idx]}
+
+        output="$results/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
+
+        for size in $sizes; do
+            python $BIN/nuc_frequencies.py \
+                --region-size $size \
+                -p $posbedgraph \
+                -n $negbedgraph \
+                -f $FASTA \
+                $ignore_arg \
+                --verbose >> $output
+        done
+
+        gzip $output
+    done
+done
+

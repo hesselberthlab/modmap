@@ -1,0 +1,16 @@
+PROJECTID=storici-lab
+SAMPLES=(FS1 FS2 FS3)
+BOWTIEIDX=$HOME/ref/genomes/sacCer1/sacCer1
+RESULT=$HOME/projects/collab/storici-lab/results/common
+DATA=$HOME/projects/collab/storici-lab//data/common
+CHROM_SIZES=$HOME/ref/genomes/sacCer1/sacCer1.chrom.sizes
+BIN=$HOME/devel/modmap/modmap
+RSCRIPTS=$BIN/R
+UMI=NNNNNNNN
+ALIGN_MODES=("uniq" "all")
+ALIGN_ARGS=("-m 1" "--all")
+GTF=$HOME/ref/genomes/sacCer1/sgdGene.sacCer1.gtf
+EXPPOS=$DATA/regev.exp.pos.bg
+EXPNEG=$DATA/regev.exp.neg.bg
+FASTA=$HOME/ref/genomes/sacCer1/sacCer1.fa
+METADATA=$DATA/metadata.tsv
