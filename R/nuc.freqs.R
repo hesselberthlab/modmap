@@ -59,8 +59,8 @@ ggplot.nuc.freq <- function(df, cur.size,
     else if (scatter) {
         gp.freq <- gp.freq + geom_line(aes(color=factor(nuc), x = offset,
                                        y = freq))
-                           + geom_point(aes(x=offset, y=freq, 
-                                        color=factor(nuc),size=3))
+        gp.freq <- gp.freq + geom_point(aes(x = offset, y = freq, 
+                                        color = factor(nuc),size = 3))
     }
 
     gp.freq <- gp.freq + theme_bw()
