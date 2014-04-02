@@ -32,7 +32,7 @@ if (plot.type == 'hist') {
     stop("plot type is either 'hist' or 'scatter'")
 }
 
-COLNAMES <- c('nuc','offset','size','count','freq')
+COLNAMES <- c('nuc','offset','region.size','count','freq')
 df <- read.table(infile, col.names=COLNAMES)
 
 if (nrow(df) == 0) {
@@ -89,7 +89,9 @@ ggplot.nuc.freq <- function(df, cur.size,
     return(gp.freq)
 }
 
-uniq.sizes = unique(df$size)
+uniq.sizes = unique(df$region.size)
+
+uniq.sizes
 
 for (idx in 1:length(uniq.sizes)) {
 
