@@ -63,14 +63,19 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
           
             for offset in range(offset_min, offset_max + 1):
 
-                # negative offsets are more 5' (usability). on the + strand,
-                # negative offsets reduce the start pos, but on the negative
-                # strand they increase it.
-
-                if strand == '+':
-                    start = row.start + offset
-                elif strand == '-':
-                    start = row.start - offset
+                if revcomp_strand:
+                    # negative offsets are more 5' (usability). on the + strand,
+                    # negative offsets reduce the start pos, but on the negative
+                    # strand they increase it.
+                   if strand == '+':
+                        start = row.start + offset
+                    elif strand == '-':
+                        start = row.start - offset
+                else:
+                    if strand == '-':
+                        start = row.start + offset
+                    elif strand == '+':
+                        start = row.start - offset
 
                 if start < 0: continue
 
@@ -79,12 +84,12 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 # fetch the sequence based on strand
                 nucs = seqs[row.chrom][start:end]
 
-                # XXX: this logic needs to be updated to account for the
-                # type of library:
-                #  1. libraries where the captured strand is sequenced
-                #      don't need this
-                #  2. libraries where the *copy* of the captured strand
-                #     is sequenced should be complemented
+                #  1. libs where the captured strand is sequenced
+                #     are the correct polarity as-is (i.e. Excision-seq
+                #     libs)
+                #  2. libs where the *copy* of the captured strand
+                #     is sequenced should be revcomplemented (i.e.
+                #     circularization-based libs)
                 if (strand == '+' and revcomp_strand) or \
                    (strand == '-' and not revcomp_strand):
                     nucs = complement(nucs[::-1])
