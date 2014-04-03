@@ -8,7 +8,6 @@ strand bedgraph counts via e.g.:
 
 $ bedtools genomecov -5 -strand + > pos.bg 
 $ bedtools genomecov -5 -strand - > neg.bg
-
 '''
 
 import sys
@@ -18,12 +17,13 @@ from operator import itemgetter
 from itertools import izip
 from collections import Counter, defaultdict
 
-from cogent import LoadSeqs, DNA
+from pyfasta import Fasta, complement
+
 from toolshed import reader
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
-__version__ = '$Revision: -1 $'
+__version__ = '0.1'
 
 # Copyright 2013,2014 Jay R. Hesselberth
 
@@ -37,12 +37,15 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             (str(ignore_chroms), str(only_chroms))
         print >>sys.stderr, ">> offset range: %d to %d" % \
             (offset_min, offset_max)
-                                        
-    seqs = LoadSeqs(fastafilename, moltype=DNA, aligned=False).todict()
+        print >>sys.stderr, ">> region size: %d" % \
+            (region_size)
+     
+    seqs = Fasta(fastafilename)
+
     nuc_counts = defaultdict(Counter)
 
     bgfiles = (posbedgraph, negbedgraph)
-    strands = ('+','-')
+    strands = ('+', '-')
 
     for bgfile, strand in izip(bgfiles, strands):
 
@@ -71,18 +74,26 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
 
                 end = start + region_size
 
-                nucs = seqs[row.chrom][start:end]
+                # fetch the sequence based on strand
+                # XXX ``str`` required to convert from unicode
+                nucs = str(seqs[row.chrom][start:end])
+
+                # XXX: this logic needs to be updated to account for the
+                # type of library:
+                #  1. libraries where the captured strand is sequenced
+                #      don't need this
+                #  2. libraries where the *copy* of the captured strand
+                #     is sequenced should be complemented
+                try:
+                    if strand == '+':
+                        nucs = complement(nucs[::-1])
+                except TypeError:
+                    pdb.set_trace()
 
                 if nucs.strip() == '': continue
 
                 # XXX fix this check with KD
                 if len(nucs.strip()) != region_size: continue
-
-                # reverse complement if plus strand. this is because the
-                # captured strand is actually the '-' strand, so we want to
-                # count those sequences
-                if strand == '+':
-                    nucs = DNA.makeSequence(nucs).rc()
 
                 nuc_counts[offset][nucs] += row.count
 
