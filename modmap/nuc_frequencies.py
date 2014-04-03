@@ -28,7 +28,7 @@ __version__ = '0.1'
 # Copyright 2013,2014 Jay R. Hesselberth
 
 def nuc_frequencies(posbedgraph, negbedgraph, fastafilename, 
-                    offset_min, offset_max, region_size,
+                    revcomp_strand, offset_min, offset_max, region_size,
                     ignore_chroms, only_chroms, verbose):
 
     if verbose:
@@ -39,6 +39,8 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             (offset_min, offset_max)
         print >>sys.stderr, ">> region size: %d" % \
             (region_size)
+        print >>sys.stderr, ">> revcomp strand: %s" % \
+            str(revcomp_strand)
      
     seqs = Fasta(fastafilename)
 
@@ -75,8 +77,7 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 end = start + region_size
 
                 # fetch the sequence based on strand
-                # XXX ``str`` required to convert from unicode
-                nucs = str(seqs[row.chrom][start:end])
+                nucs = seqs[row.chrom][start:end]
 
                 # XXX: this logic needs to be updated to account for the
                 # type of library:
@@ -84,11 +85,9 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 #      don't need this
                 #  2. libraries where the *copy* of the captured strand
                 #     is sequenced should be complemented
-                try:
-                    if strand == '+':
-                        nucs = complement(nucs[::-1])
-                except TypeError:
-                    pdb.set_trace()
+                if (strand == '+' and revcomp_strand) or \
+                   (strand == '-' and not revcomp_strand):
+                    nucs = complement(nucs[::-1])
 
                 if nucs.strip() == '': continue
 
@@ -146,6 +145,11 @@ def parse_options(args):
     parser.add_option_group(group)
 
     group = OptionGroup(parser, "Variables")
+    group.add_option("--revcomp-strand", action="store_true", 
+        metavar="CAPTURED STRAND", default=False,
+        help="read is reverse comp of captured strand"
+        " (default: %default)")
+
     group.add_option("--offset-min", action="store", type='int', 
         metavar="MIN_OFFSET", default=-15,
         help="min offset from current position to examine. 5' positions are "
@@ -195,7 +199,8 @@ def main(args=sys.argv[1:]):
     ignore_chroms = tuple(options.ignore_chrom)
     only_chroms = tuple(options.only_chrom)
 
-    kwargs = {'offset_min':options.offset_min,
+    kwargs = {'revcomp_strand':options.revcomp_strand,
+              'offset_min':options.offset_min,
               'offset_max':options.offset_max,
               'region_size':options.region_size,
               'verbose':options.verbose,
