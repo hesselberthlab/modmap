@@ -67,7 +67,7 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                     # negative offsets are more 5' (usability). on the + strand,
                     # negative offsets reduce the start pos, but on the negative
                     # strand they increase it.
-                   if strand == '+':
+                    if strand == '+':
                         start = row.start + offset
                     elif strand == '-':
                         start = row.start - offset
