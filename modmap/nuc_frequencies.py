@@ -28,7 +28,8 @@ __version__ = '0.1'
 # Copyright 2013,2014 Jay R. Hesselberth
 
 def nuc_frequencies(posbedgraph, negbedgraph, fastafilename, 
-                    revcomp_strand, offset_min, offset_max, region_size,
+                    revcomp_strand, min_counts, 
+                    offset_min, offset_max, region_size,
                     ignore_chroms, only_chroms, verbose):
 
     if verbose:
@@ -56,11 +57,16 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
 
         for row in reader(bgfile, header=BedGraphLine):
 
+            # skip data based on specified chromosomes
             if row.chrom in ignore_chroms:
                 continue
             if only_chroms and row.chrom not in only_chroms:
                 continue
-          
+
+            # skip data if counts are too low
+            if row.count <= min_counts:
+                continue
+
             for offset in range(offset_min, offset_max + 1):
 
                 # -15 ------------- 0 ------------- +15
@@ -146,6 +152,12 @@ def parse_options(args):
     parser.add_option_group(group)
 
     group = OptionGroup(parser, "Variables")
+
+    group.add_option("--minimum-counts", action="store", 
+        metavar="MINIMUM_COUNTS", default=0,
+        help="minimum number of counts to be included in analysis"
+        " (default: %default)")
+
     group.add_option("--revcomp-strand", action="store_true", 
         metavar="CAPTURED STRAND", default=False,
         help="read is reverse comp of captured strand"
@@ -201,6 +213,7 @@ def main(args=sys.argv[1:]):
     only_chroms = tuple(options.only_chrom)
 
     kwargs = {'revcomp_strand':options.revcomp_strand,
+              'min_counts':options.minimum_counts,
               'offset_min':options.offset_min,
               'offset_max':options.offset_max,
               'region_size':options.region_size,
