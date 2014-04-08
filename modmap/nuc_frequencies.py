@@ -63,16 +63,23 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
           
             for offset in range(offset_min, offset_max + 1):
 
-                if strand == '-':
-                    start = row.start - offset
-                elif strand == '+':
-                    start = row.start + offset
+                # -15 ------------- 0 ------------- +15
+                #     TAGCTAGGCTAGCGACGTAGCGACTAGCA
+                # (+) -----------------------------
+                #                   >>>>>>>>>>>>>>>
+                #      <<<<<<<<<<<<<<
+                # (-) -----------------------------
 
-                if start < 0: continue
+                if strand == '+':
+                    start = row.start + offset
+                elif strand == '-':
+                    # this will be revcomped later
+                    start = row.start - offset
 
                 end = start + region_size
 
-                # fetch the sequence based on strand
+                if start < 0: continue
+
                 nucs = seqs[row.chrom][start:end]
 
                 #  1. libs where the captured strand is sequenced
@@ -81,13 +88,11 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 #  2. libs where the *copy* of the captured strand
                 #     is sequenced should be revcomplemented (i.e.
                 #     circularization-based libs)
+
                 if (strand == '+' and revcomp_strand) or \
                    (strand == '-' and not revcomp_strand):
                     nucs = complement(nucs[::-1])
 
-                if nucs.strip() == '': continue
-
-                # XXX fix this check with KD
                 if len(nucs.strip()) != region_size: continue
 
                 nuc_counts[offset][nucs] += row.count
