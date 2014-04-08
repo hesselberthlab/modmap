@@ -86,9 +86,9 @@ ggplot.nuc.freq <- function(df, cur.size,
     # add title
     title.top = paste('modmap nucleotide-frequency (sample ',
                       sample.name, ' region size ', cur.size, ')', sep='')
-    # title.bottom = "Register 0 is modified base. Negative numbers are 5'"
-    title.bottom = paste('n sites = ' num.sites, ' n counts = ',
-                         sum.counts)
+    title.bottom = paste('n sites = ', num.sites, ' n counts = ',
+                         sum.counts, sep='')
+
     title = paste(title.top, title.bottom, sep='\n')
     gp.freq <- gp.freq + ggtitle(title)
 
@@ -96,8 +96,6 @@ ggplot.nuc.freq <- function(df, cur.size,
 }
 
 uniq.sizes = unique(df$region.size)
-
-uniq.sizes
 
 for (idx in 1:length(uniq.sizes)) {
 
