@@ -67,8 +67,7 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 continue
 
             # skip data if counts are too low
-            if row.count <= min_counts:
-                continue
+            if row.count < min_counts: continue
 
             # sites in bedgraph examined
             total_sites += 1
