@@ -69,7 +69,8 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             # skip data if counts are too low
             if row.count < min_counts: continue
 
-            # sites in bedgraph examined
+            # sites in bedgraph examined - must come after all checks
+            # above
             total_sites += 1
 
             for offset in range(offset_min, offset_max + 1):
@@ -159,7 +160,7 @@ def parse_options(args):
 
     group = OptionGroup(parser, "Variables")
 
-    group.add_option("--minimum-counts", action="store", 
+    group.add_option("--minimum-counts", action="store", type='int',
         metavar="MINIMUM_COUNTS", default=0,
         help="minimum number of counts to be included in analysis"
         " (default: %default)")
