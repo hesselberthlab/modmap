@@ -50,6 +50,9 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
     bgfiles = (posbedgraph, negbedgraph)
     strands = ('+', '-')
 
+    # total number of sites examined
+    total_sites = 0
+
     for bgfile, strand in izip(bgfiles, strands):
 
         # filenames can be None
@@ -64,8 +67,11 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 continue
 
             # skip data if counts are too low
-            if row.count <= min_counts:
-                continue
+            if row.count < min_counts: continue
+
+            # sites in bedgraph examined - must come after all checks
+            # above
+            total_sites += 1
 
             for offset in range(offset_min, offset_max + 1):
 
@@ -104,7 +110,7 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 nuc_counts[offset][nucs] += row.count
 
     # report the results
-    header = ('#nuc','offset','region.size','count','freq') 
+    header = ('#nuc','offset','region.size','count','freq','total.sites') 
     print '\t'.join(header)
 
     for offset, counts in sorted(nuc_counts.items()):
@@ -113,7 +119,8 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
         for nuc, count in sorted(counts.items(), key=itemgetter(1), \
                                  reverse=True):
             freq = float(count) / float(sum_counts)
-            vals = map(str, [nuc, offset, region_size, count, freq])
+            vals = map(str, [nuc, offset, region_size, count, freq,
+                             total_sites])
             print '\t'.join(vals)
 
 class BedGraphLine:
@@ -153,7 +160,7 @@ def parse_options(args):
 
     group = OptionGroup(parser, "Variables")
 
-    group.add_option("--minimum-counts", action="store", 
+    group.add_option("--minimum-counts", action="store", type='int',
         metavar="MINIMUM_COUNTS", default=0,
         help="minimum number of counts to be included in analysis"
         " (default: %default)")

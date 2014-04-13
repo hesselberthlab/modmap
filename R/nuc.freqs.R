@@ -32,7 +32,7 @@ if (plot.type == 'hist') {
     stop("plot type is either 'hist' or 'scatter'")
 }
 
-COLNAMES <- c('nuc','offset','region.size','count','freq')
+COLNAMES <- c('nuc','offset','region.size','count','freq','total.sites')
 df <- read.table(infile, col.names=COLNAMES)
 
 if (nrow(df) == 0) {
@@ -48,7 +48,9 @@ ggplot.nuc.freq <- function(df, cur.size,
     # subset the data
     df.subset <- subset(df, region.size == cur.size)
 
-    num.sites <- length(df.subset)
+    # total.sites should all be the same, just take the first
+    num.sites <- df.subset$total.sites[1]
+
     sum.counts <- sum(df.subset$count)
 
     gp.freq <- ggplot(data = df.subset,
