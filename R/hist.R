@@ -10,6 +10,7 @@
 library(ggplot2)
 library(RColorBrewer)
 library(Cairo)
+library(dplyr)
 
 # get the filename
 output = commandArgs(trailingOnly=TRUE)
@@ -26,6 +27,9 @@ COLNAMES <- c('chrom','start','end','count')
 df.pos <- read.table(bg.pos, col.names=COLNAMES)
 df.neg <- read.table(bg.neg, col.names=COLNAMES)
 df.all <- rbind(df.pos, df.neg)
+df.all <- tbl_df(df.all)
+
+# df.all <- df.all %.% filter(count > 0)
 
 if (nrow(df.pos) == 0 || nrow(df.neg) == 0) {
     warning("empty data frames?")
@@ -33,12 +37,19 @@ if (nrow(df.pos) == 0 || nrow(df.neg) == 0) {
 }
 head(df)
 
-gp <- ggplot(df.all, aes(chrom, count))
-gp <- 
+gp <- ggplot(df.all, aes(x = count))
+gp <- gp + geom_histogram(fill='white', color='black')
+gp <- gp + scale_y_sqrt()
+
+gp <- gp + xlab('Positions')
+gp <- gp + ylab('Counts')
+
+title <- paste('modmap histogram (sample ', sample.name, ')', sep='')
+gp <- gp + ggtitle(title)
 
 pdf.filename <- paste(output.dir, '/', 'modmap.histogram.',
                       sample.name, '.pdf', sep='')
 
 ggsave(filename = pdf.filename, 
-       plot = gp.nuc.freq,
+       plot = gp,
        device = CairoPDF)
