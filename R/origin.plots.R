@@ -21,8 +21,8 @@ infile = output[1]
 sample.name = output[2]
 output.dir = output[3]
 
-COLNAMES <- c('nuc','offset','size','count','freq','direction','sample.id')
-df <- read.table(gzfile(infile), col.names=COLNAMES)
+COLNAMES <- c('nuc','offset','size','count','freq','total.sites','direction','sample.id')
+df <- read.table(infile, col.names=COLNAMES)
 if (nrow(df) == 0) {
     warning("empty data frame")
     quit(status=0)

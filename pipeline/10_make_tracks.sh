@@ -8,11 +8,13 @@
 Generate tracklines for UCSC
 DOC
 
+set -o nounset -o pipefail -o errexit -x
+
 source $HOME/projects/collab/storici-lab/bin/config.sh
 
 # this grabs colors for each sample
 num_colors=${#SAMPLES[@]}
-color_str=$(python -c "import colorbrewer; print colorbrewer.Dark2[$num_colors]" \
+color_str=$(python -c "import colorbrewer; print colorbrewer.Paired[$num_colors]" \
     | sed 's/ //g; s/(/"/g;s/)/"/g; s/","/ /g; s/"//g; s/\[//g; s/\]//g')
 colors=(`echo ${color_str}`)
 

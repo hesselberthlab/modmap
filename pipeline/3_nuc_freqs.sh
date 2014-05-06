@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#BSUB -J nuc.freqs[1-7]
+#BSUB -J nuc.freqs[1-10]
 #BSUB -e nuc.freqs.%J.%I.err
 #BSUB -o nuc.freqs.%J.%I.out
 #BSUB -q normal
@@ -50,6 +50,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         for size in $sizes; do
             python $BIN/nuc_frequencies.py \
+                --revcomp-strand \
                 --region-size $size \
                 -p $posbedgraph \
                 -n $negbedgraph \

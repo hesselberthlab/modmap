@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#BSUB -J coverage[1-7]
+#BSUB -J coverage[1-10]
 #BSUB -e coverage.%J.%I.err
 #BSUB -o coverage.%J.%I.out
 #BSUB -q normal

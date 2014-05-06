@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#BSUB -J ori.analysis[1-7]
+#BSUB -J ori.analysis[1-10]
 #BSUB -e ori.analysis.%J.%I.err
 #BSUB -o ori.anlaysis.%J.%I.out
 #BSUB -q normal
@@ -118,7 +118,7 @@ for align_mode in ${ALIGN_MODES[@]}; do
                 -p $pos_bg -n $neg_bg -f $FASTA \
                 $ignore_arg \
                 | awk -v ID=$sample -v DIR=$direction \
-                    'BEGIN {OFS="\t"} {print $0, DIR, ID}' \
+                    '{print $0, "\t", DIR, "\t", ID}' \
                 > $result_tab
         done
         # combine results into 1 file
