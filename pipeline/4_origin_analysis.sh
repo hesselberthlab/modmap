@@ -114,6 +114,7 @@ for align_mode in ${ALIGN_MODES[@]}; do
             # offsets are with respect to base in question:
             # 0 = ribo, -1 = upstream, 1 = downstream
             python $BIN/nuc_frequencies.py \
+                --revcomp-strand \
                 --offset-min -1 --offset-max 1 --region-size 1 \
                 -p $pos_bg -n $neg_bg -f $FASTA \
                 $ignore_arg \
