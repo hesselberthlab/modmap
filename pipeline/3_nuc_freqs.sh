@@ -50,7 +50,6 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         for size in $sizes; do
             python $BIN/nuc_frequencies.py \
-                --revcomp-strand \
                 --region-size $size \
                 -p $posbedgraph \
                 -n $negbedgraph \
