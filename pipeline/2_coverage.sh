@@ -38,13 +38,18 @@ for umi_type in ${umi_types[@]}; do
             countsnegbg=$bgresults/$sample.$umi_type.align.$align_mode.strand.neg.counts.bg
         fi
 
+        # need to flip these signals to account for the fact that the
+        # reverse complement of the sequence collected was the sequence
+        # captured
         if [[ ! -f $countsbg ]]; then
             bedtools genomecov -5 -bg -g $CHROM_SIZES -ibam $bam \
                 > $countsbg
+            # note strand mismatch
             bedtools genomecov -5 -bg -g $CHROM_SIZES -ibam $bam \
-                -strand "+" > $countsposbg
+                -strand "-" > $countsposbg
+            # note strand mismatch
             bedtools genomecov -5 -bg -g $CHROM_SIZES -ibam $bam \
-                -strand "-" > $countsnegbg
+                -strand "+" > $countsnegbg
         fi
     done
 done
