@@ -48,8 +48,11 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         output="$results/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
 
+        # signals need to be reverse complemented because the sequence is
+        # the reverse complement of the captured strand
         for size in $sizes; do
             python $BIN/nuc_frequencies.py \
+                --revcomp-strand \
                 --region-size $size \
                 -p $posbedgraph \
                 -n $negbedgraph \
