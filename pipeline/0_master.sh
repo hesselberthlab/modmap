@@ -12,12 +12,13 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 ASSEMBLIES=("sacCer1" "sacCer2" "sacCer3")
-PIPLINE=$HOME/devel/modmap/pipeline
+export PIPELINE=$HOME/devel/modmap/pipeline
 
 for assembly in ${ASSEMBLIES[@]}; do
 
-    source $HOME/projects/collab/storici-lab/bin/config.sh
+    source $PIPELINE/config.sh
 
+    # reassign assembly-specific variables
     export ASSEMBLY=$assembly
     export BOWTIEIDX=$HOME/ref/genomes/$assembly/$assembly
     export CHROM_SIZES=$HOME/ref/genomes/$assembly/$assembly.chrom.sizes
@@ -25,21 +26,25 @@ for assembly in ${ASSEMBLIES[@]}; do
     export FASTA=$HOME/ref/genomes/$assembly/$assembly.fa
     export RESULT=$HOME/projects/collab/storici-lab/results/common/$assembly
     
-    job_dep="$ASSEMBLY[1-$NUM_SAMPLES]"
+    job_array="[1-$NUM_SAMPLES]"
 
-    bsub -J align.$job_dep \
+    bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
 
-    bsub -J coverage.$job_dep -w align.$job_dep \
+    bsub -J "coverage_$ASSEMBLY$job_array" \
+        -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
 
-    bsub -J nuc.freqs.$job_dep -w coverage.$job_dep \
+    bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
+        -w "done('coverage_$ASSEMBLY[*]')" \
         < $PIPELINE/3_nuc_freqs.sh
 
-    bsub -J origin.anal.$job_dep -w nuc.freqs.$job_dep \
+    bsub -J "origin_anal_$ASSEMBLY$job_array" \
+        -w "done('nuc_freqs_$ASSEMBLY[*]')" \
         < $PIPELINE/4_origin_analysis.sh
 
-    bsub -J plots.$job_dep -w origin.anal.$job_dep \
+    bsub -J "plots_$ASSEMBLY$job_array" \
+        -w "done('origin_anal_$ASSEMBLY[*]')" \
         < $PIPELINE/5_plots.sh
 
 done
