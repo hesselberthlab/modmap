@@ -85,4 +85,5 @@ ggsave(filename = freq.pdf.filename, plot = gp.nuc.freq, device = CairoPDF)
 
 count.pdf.filename <- paste(output.dir, '/', 'modmap.origin.counts',
                            '.', sample.name, '.pdf', sep='')
-ggsave(filename = freq.pdf.filename, plot = gp.origin.count, device = CairoPDF)
+ggsave(filename = count.pdf.filename, plot = gp.origin.count, device = CairoPDF)
+
