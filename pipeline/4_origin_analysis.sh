@@ -27,8 +27,8 @@ oribed=$DATA/$ASSEMBLY/oridb.confirmed.bed
 timingbg=$DATA/$ASSEMBLY/yabuki.timing.bedgraph
 
 # XXX origin variables
-max_timing=25
-flank_size=10000
+max_timing=20
+flank_size=1000
 
 strands=("pos" "neg")
 # XXX: upstream and downstream maybe more acc
@@ -133,7 +133,9 @@ for align_mode in ${ALIGN_MODES[@]}; do
                 -p $pos_bg -n $neg_bg -f $FASTA \
                 $ignore_arg \
                 | awk -v ID=$sample -v DIR=$direction \
-                    '{print $0, "\t", DIR, "\t", ID}' \
+                      -v TREP=$max_timing -v FLANK=$flank_size \
+                    '{print $0, "\t", DIR, "\t", ID, "\t",\
+                      TREP, "\t", FLANK}' \
                 > $result_tab
         done
 
