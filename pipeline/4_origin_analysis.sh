@@ -93,16 +93,30 @@ for align_mode in ${ALIGN_MODES[@]}; do
 
         for direction in ${directions[@]}; do
 
+            #                       _______________
+            #                      / <----         \
+            # 5'                  /                 \                   3'
+            # ===================/                   \====================
+            # ===================\                   /====================
+            # 3'                  \        ---->     /                   5'
+            #                      \_______________/
+
+            # Leading signals are the captured negative strand (i.e. pos
+            # strand sequences) upstream
+            # (left) ofthe origin; captured positive strand (i.e. neg
+            # strand sequences downstream
+            # (right) of origin
+
             if [[ $direction == "lagging" ]]; then
-                # - lagging strand = -p $pos_left_bedgraph -n $neg_right_bedgraph
-                pos_bg="$results/$sample.align.$align_mode.strand.pos.side.left.origin.counts.bg"
-                neg_bg="$results/$sample.align.$align_mode.strand.neg.side.right.origin.counts.bg"
+                # - lagging strand = -p $neg_left_bedgraph -n $pos_right_bedgraph
+                pos_bg="$results/$sample.align.$align_mode.strand.neg.side.left.origin.counts.bg"
+                neg_bg="$results/$sample.align.$align_mode.strand.pos.side.right.origin.counts.bg"
                 result_tab="$results/lagging.align.$align_mode.ignore.$ignore_mode.origin.nuc_counts.tab"
 
             elif [[ $direction == "leading" ]]; then
-                # - leading strand = -p $pos_right_bedgraph -n $neg_left_bedgraph
-                pos_bg="$results/$sample.align.$align_mode.strand.pos.side.right.origin.counts.bg"
-                neg_bg="$results/$sample.align.$align_mode.strand.neg.side.left.origin.counts.bg"
+                # - leading strand = -p $neg_right_bedgraph -n $pos_left_bedgraph
+                pos_bg="$results/$sample.align.$align_mode.strand.pos.side.left.origin.counts.bg"
+                neg_bg="$results/$sample.align.$align_mode.strand.neg.side.right.origin.counts.bg"
                 result_tab="$results/leading.align.$align_mode.ignore.$ignore_mode.origin.nuc_counts.tab"
             fi
 
@@ -114,6 +128,7 @@ for align_mode in ${ALIGN_MODES[@]}; do
             # offsets are with respect to base in question:
             # 0 = ribo, -1 = upstream, 1 = downstream
             python $BIN/nuc_frequencies.py \
+                --revcomp-strand \
                 --offset-min -1 --offset-max 1 --region-size 1 \
                 -p $pos_bg -n $neg_bg -f $FASTA \
                 $ignore_arg \
@@ -121,6 +136,7 @@ for align_mode in ${ALIGN_MODES[@]}; do
                     '{print $0, "\t", DIR, "\t", ID}' \
                 > $result_tab
         done
+
         # combine results into 1 file
         combined="$results/combined.align.$align_mode.ignore.$ignore_mode.tab"
         cat $results/*align.$align_mode.ignore.$ignore_mode.*.tab >> $combined
