@@ -23,18 +23,19 @@ for assembly in ${ASSEMBLIES[@]}; do
     export FASTA=$HOME/ref/genomes/$assembly/$assembly.fa
     export RESULT=$HOME/projects/collab/storici-lab/results/common/$assembly
 
-    bsub -J align.dep \
+    bsub -J align.$ASSEMBLY.dep \
         < $PIPELINE/1_align.sh
 
-    bsub -J coverage.dep -w align.dep \
+    bsub -J coverage.$ASSEMBLY.dep -w align.$ASSEMBLY.dep \
         < $PIPELINE/2_coverage.sh 
 
-    bsub -J nuc.freqs.dep -w coverage.dep \
+    bsub -J nuc.freqs.$ASSEMBLY.dep -w coverage.$ASSEMBLY.dep \
         < $PIPELINE/3_nuc_freqs.sh
 
-    bsub -J origin.anal.dep -w nuc.freqs.dep \
+    bsub -J origin.anal.$ASSEMBLY.dep -w nuc.freqs.$ASSEMBLY.dep \
         < $PIPELINE/4_origin_analysis.sh
 
-    bsub -J plots.dep -w origin.anal.dep \
+    bsub -J plots.$ASSEMBLY.dep -w origin.anal.$ASSEMBLY.dep \
         < $PIPELINE/5_plots.sh
+
 done
