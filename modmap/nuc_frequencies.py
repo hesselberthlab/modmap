@@ -82,13 +82,21 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 #      <<<<<<<<<<<<<<
                 # (-) -----------------------------
 
+                # upstream offsets are negative values
                 if strand == '+':
                     start = row.start + offset
                 elif strand == '-':
                     # this will be revcomped later
                     start = row.start - offset
 
-                end = start + region_size
+                # make sure that the 3' most position in a region
+                # is the base of interest
+                if region_size > 1:
+                    end = start
+                    start = end - region_size
+                else:
+                    # half open at the position of interest
+                    end = start + region_size
 
                 if start < 0: continue
 
