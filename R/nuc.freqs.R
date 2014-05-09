@@ -86,9 +86,9 @@ ggplot.nuc.freq <- function(df, cur.size,
     gp.freq <- gp.freq + ylab('Frequency')
 
     # add title
-    title.top = paste('modmap nucleotide-frequency (sample ',
+    title.top = paste('modmap nucleotide-frequency\n(sample ',
                       sample.name, ' region size ', cur.size, ')', sep='')
-    title.bottom = paste('n sites = ', num.sites, ' n counts = ',
+    title.bottom = paste('n.sites = ', num.sites, ' n.counts = ',
                          sum.counts, sep='')
 
     title = paste(title.top, title.bottom, sep='\n')

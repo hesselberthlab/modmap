@@ -45,7 +45,7 @@ ggplot.origin.plot <- function(df, sample.name, ... ) {
     gp <- gp + ylab('Frequency')
 
     # add title
-    title.top = paste('modmap origin analysis (sample ',
+    title.top = paste('modmap origin-analysis\n(sample ',
                       sample.name, ')', sep='')
     title.bottom = ""
     title = paste(title.top, title.bottom, sep='\n')
