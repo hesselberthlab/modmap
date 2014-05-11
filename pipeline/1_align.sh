@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #BSUB -J align[1-10]
 #BSUB -e align.%J.%I.err
 #BSUB -o align.%J.%I.out
@@ -10,14 +11,13 @@
 Trim the UMI from the FASTQ, align trimmed reads using bowtie suppressing 
 all reads that align more than once, then remove UMI duplicates from the
 alignment.
-
-Need to align in two different ways: allowing all alignemtns, and
-supressing multiply mapping alignments
 DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/projects/collab/storici-lab/bin/config.sh
+# CONFIG provided by master.sh
+source $CONFIG 
+
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 unprocessed_fastq=$DATA/$sample.fq.gz
@@ -25,7 +25,9 @@ fastq=$DATA/$sample.umi.fq.gz
 
 # trim the UMI
 if [[ ! -f $fastq ]]; then
-    umitools trim $unprocessed_fastq $UMI | gzip -c > $fastq
+    umitools trim $unprocessed_fastq $UMI \
+        | gzip -c \
+        > $fastq
 fi
 
 results=$RESULT/$sample/alignment
@@ -44,7 +46,6 @@ for idx in ${!ALIGN_MODES[@]}; do
 
     # align the reads
     if [[ ! -f $umibam ]]; then
-        # disallow multimapped
         zcat $fastq \
             | bowtie $align_arg --sam $BOWTIEIDX -p 6 - \
             2> $stats \
