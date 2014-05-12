@@ -86,17 +86,20 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 if strand == '+':
                     start = row.start + offset
                 elif strand == '-':
-                    # this will be revcomped later
                     start = row.start - offset
 
-                # make sure that the 3' most position in a region
-                # is the base of interest
-                if region_size > 1:
-                    end = start
-                    start = end - region_size
-                else:
+                if region_size == 1:
                     # half open at the position of interest
                     end = start + region_size
+                else:
+                    # make sure that the 3' most position in a region
+                    # is the base of interest
+                    if strand == '+':
+                        end = start + 1 # include position with + 1
+                        start = end - region_size
+                    else:
+                        # negative strand
+                        end = start + region_size
 
                 if start < 0: continue
 
@@ -116,6 +119,8 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 if len(nucs.strip()) != region_size: continue
 
                 nuc_counts[offset][nucs] += row.count
+    # XXX
+    debug_report(nuc_counts)
 
     # report the results
     header = ('#nuc','offset','region.size','count','freq','total.sites') 
@@ -130,6 +135,23 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             vals = map(str, [nuc, offset, region_size, count, freq,
                              total_sites])
             print '\t'.join(vals)
+
+def debug_report(nuc_counts):
+    ''' debug counts at specific positions '''
+    for offset, counts in sorted(nuc_counts.items()):
+
+        sum_counts = sum(counts.values())
+        sums = Counter()
+
+        for nuc, count in sorted(counts.items(), key=itemgetter(1), \
+                                 reverse=True):
+            
+            freq = float(count) / float(sum_counts)
+            sums[nuc[-1]] += freq
+
+        for nuc, nucsum in sums.items():
+            vals = map(str, ['#>>debug', nuc, offset, nucsum])
+            print >>sys.stderr, '\t'.join(vals)
 
 class BedGraphLine:
     ''' class for bedgraph row conversion '''
