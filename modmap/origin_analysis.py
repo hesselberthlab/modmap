@@ -10,6 +10,7 @@ from collections import defaultdict
 
 from pybedtools import BedTool
 
+from .common import load_coverage
 from .nuc_frequencies import calc_nuc_counts
 
 __author__ = 'Jay Hesselberth'
@@ -19,18 +20,17 @@ __version__ = '0.1'
 SIDES = ('left','right')
 STRANDS = ('pos','neg')
 
-def origin_anlaysis(timing_bedgraph, origin_bed, max_timing, flank_size,
-                    bam_filename, fasta_filename, chrom_size_filename,
-                    verbose):
+def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
+                    fasta_filename, chrom_sizes_filename,
+                    max_timing, flank_size, verbose):
 
     selected_ori = select_origins(origin_bed, timing_bedgraph, max_timing,
                                   verbose)
 
-    # XXX duplicative in modmap.nuc_frequencies
-    pos_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
-                                           strand='+')
-    neg_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
-                                           strand='-')
+    pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
+                                       verbose=verbose) 
+    neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
+                                       verbose=verbose) 
 
     ori_signals = calc_origin_signals(selected_ori, pos_signal_bedtool,
                                       neg_signal_bedtool, flank_size,
@@ -115,18 +115,22 @@ def calc_origin_signals(selected_ori, pos_signal_bedtool,
 def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
     ''' select origins based on max_timing '''
 
-    origin_bt = BedTool(origin_bed)
-    timing_bt = BedTool(timing_bedgraph)
+    origin_bedtool = BedTool(origin_bed)
+    timing_bedtool = BedTool(timing_bedgraph)
 
     # intersect and group to calculate timing near origins
-    int_result = origin_bt.intersect(timing_bt, wb=True)
-    group_result = int_result.groupby(g=5, c=10, o=mean)
-   
+    int_bedtool = origin_bedtool.intersect(timing_bedtool, wb=True)
+    group_bedtool = int_bedtool.groupby(g=4, c=10, o='mean')
+  
+    # XXX hack to get a filehandle for looping. have to do this because
+    # the groupby result is only 2 columns and doesn't appear to allow
+    # iteration by the std BedTool iter() method
+    group_data = open(group_bedtool.TEMPFILES[-1])
+
     select_origins = []
-    for row in group_result:
-        
-        # XXX
-        pdb.set_trace()
+    for row in group_data:
+        origin, timing = row.strip().split('\t')
+        timing = float(timing)
 
         if timing <= max_timing:
             select_origins.append(origin)
@@ -139,7 +143,7 @@ def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
 
-    usage = "%prog [OPTION]... BAM_FILENAME FASTA_FILENAME"
+    usage = "%prog [OPTION]... ORIGIN_BED TIMING_BEDGRAPH BAM_FILENAME FASTA_FILENAME CHROM_SIZE"
     version = "%%prog %s" % __version__
     description = ("origin analysis")
 
@@ -148,6 +152,12 @@ def parse_options(args):
 
     group = OptionGroup(parser, "Variables")
 
+    group.add_option("--max-timing", action="store", type='float',
+        default=20, help="maximum timing in Trep (default: %default)")
+
+    group.add_option("--flank-size", action="store", type='int',
+        default=500, help="origin flank size in bp (default: %default)")
+
     group.add_option("-v", "--verbose", action="store_true",
         default=False, help="verbose output (default: %default)")
 
@@ -155,20 +165,27 @@ def parse_options(args):
 
     options, args = parser.parse_args(args)
 
-    if len(args) != 2:
-        parser.error("specify BAM and FASTA")
+    if len(args) != 5:
+        parser.error("specify 5 required files")
 
     return options, args
 
 def main(args=sys.argv[1:]):
     options, args = parse_options(args)
 
-    kwargs = {'verbose':options.verbose}
+    kwargs = {'max_timing':options.max_timing,
+              'flank_size':options.flank_size,
+              'verbose':options.verbose}
 
-    bam_filename = args[0]
-    fasta_filename = args[1]
+    origin_bed = args[0]
+    timing_bedgraph = args[1]
+    bam_filename = args[2]
+    fasta_filename = args[3]
+    chrom_sizes_filename = args[4]
 
-    return nuc_frequencies(bam_filename, fasta_filename, **kwargs)
+    return origin_analysis(origin_bed, timing_bedgraph,
+                           bam_filename, fasta_filename,
+                           chrom_sizes_filename, **kwargs)
 
 if __name__ == '__main__':
     sys.exit(main()) 
