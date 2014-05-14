@@ -24,7 +24,7 @@ def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
                     fasta_filename, chrom_sizes_filename,
                     max_timing, flank_size, verbose):
 
-    selected_ori = select_origins(origin_bed, timing_bedgraph, max_timing,
+    origin_bedtool = select_origins(origin_bed, timing_bedgraph, max_timing,
                                   verbose)
 
     pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
@@ -32,11 +32,22 @@ def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
     neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
                                        verbose=verbose) 
 
-    ori_signals = calc_origin_signals(selected_ori, pos_signal_bedtool,
-                                      neg_signal_bedtool, flank_size,
-                                      verbose)
+    ori_signals = calc_origin_signals(origin_bedtool, pos_signal_bedtool,
+                                      neg_signal_bedtool,
+                                      chrom_sizes_filename,
+                                      flank_size, verbose)
 
-def nuc_counts(ori_signals, verbose):
+    origin_nuc_counts = calc_origin_nuc_counts(ori_signals,
+                                               pos_signal_bedtool,
+                                               neg_signal_bedtool,
+                                               fasta_filename,
+                                               verbose)
+
+    pdb.set_trace()
+
+def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
+                           neg_signal_bedtool, fasta_filename, verbose):
+
     ''' calculate nucleotide frequencies within origins.
 
     leading strand = -p $neg_right_bedgraph -n $pos_left_bedgraph
@@ -76,29 +87,33 @@ def nuc_counts(ori_signals, verbose):
         pos_signal = ori_signals[pos_strand_arg][pos_side_arg]
         neg_signal = ori_signals[neg_strand_arg][neg_side_arg]
 
-        counts = calc_nuc_counts(pos_signal, neg_signal, 
-                                 fasta_filename, **kwargs)
+        counts = calc_nuc_counts(pos_signal_bedtool,
+                                 neg_signal_bedtool, 
+                                 fasta_filename,
+                                 **kwargs)
 
         result[ori_strand] = counts
 
     return result
 
-def calc_origin_signals(selected_ori, pos_signal_bedtool,
-                        neg_signal_bedtool, flank_size, verbose):
+def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
+                        neg_signal_bedtool, chrom_sizes_filename,
+                        flank_size, verbose):
+
     ''' calcualte signals within flanks up and downstream of selected
     origins '''
 
     # left = upstream; right = downstream
     flanks = {}
-    flanks['left'] = selected_ori.flank(l=flank_size, r=0,
-                                            g=chrom_sizes)
-    flanks['right'] = selected_ori.flank(l=0, r=flank_size,
-                                            g=chrom_sizes)
+    flanks['left'] = origin_bedtool.flank(l=flank_size, r=0,
+                                            g=chrom_sizes_filename)
+    flanks['right'] = origin_bedtool.flank(l=0, r=flank_size,
+                                            g=chrom_sizes_filename)
 
     # get positive and negative signals within flanks
     signals = {}
-    siganls['pos'] = signal_pos_bedtool
-    signals['neg' ]= signal_neg_bedtool
+    signals['pos'] = pos_signal_bedtool
+    signals['neg' ]= neg_signal_bedtool
 
     result = defaultdict(dict)
 
@@ -113,7 +128,10 @@ def calc_origin_signals(selected_ori, pos_signal_bedtool,
     return result
 
 def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
-    ''' select origins based on max_timing '''
+    ''' select origins based on max_timing.
+    
+        returns: BedTool
+        '''
 
     origin_bedtool = BedTool(origin_bed)
     timing_bedtool = BedTool(timing_bedgraph)
@@ -127,18 +145,26 @@ def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
     # iteration by the std BedTool iter() method
     group_data = open(group_bedtool.TEMPFILES[-1])
 
-    select_origins = []
+    select_origins = set() 
     for row in group_data:
         origin, timing = row.strip().split('\t')
         timing = float(timing)
 
         if timing <= max_timing:
-            select_origins.append(origin)
+            select_origins.add(origin)
    
     if verbose:
         print >>sys.stderr, ">> %d origins selected" % len(select_origins)
 
-    return select_origins
+    # now reconstruct a BedTool with selected origins
+    select_intervals = []
+    for row in origin_bedtool:
+        if row.name in select_origins:
+            select_intervals.append(row)
+
+    result = BedTool(select_intervals)
+
+    return result 
 
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
