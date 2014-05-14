@@ -1,13 +1,7 @@
 #! /usr/bin/env python
 
-''' nuc_frequencies: calculate nucleotide frequencies at modified base
+''' modmap.nuc_frequencies: calculate nucleotide frequencies at modified base
 sites.
-
-Part of the modmap analysis pipeline. Assumes generation of pos and neg
-strand bedgraph counts via e.g.:
-
-$ bedtools genomecov -5 -strand + > pos.bg 
-$ bedtools genomecov -5 -strand - > neg.bg
 '''
 
 import sys
@@ -17,9 +11,8 @@ from operator import itemgetter
 from itertools import izip
 from collections import Counter, defaultdict
 
+from pybedtools import BedTool
 from pyfasta import Fasta, complement
-
-from toolshed import reader
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -27,38 +20,53 @@ __version__ = '0.1'
 
 # Copyright 2013,2014 Jay R. Hesselberth
 
-def nuc_frequencies(posbedgraph, negbedgraph, fastafilename, 
+def nuc_frequencies(bam_filename, fasta_filename, 
                     revcomp_strand, min_counts, 
                     offset_min, offset_max, region_size,
                     ignore_chroms, only_chroms, verbose):
 
+    pos_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
+                                           strand='+')
+    neg_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
+                                           strand='-')
+
+    nuc_counts = calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool,
+                                 seq_fasta, 
+                                 revcomp_strand, min_counts, 
+                                 offset_min, offset_max, region_size,
+                                 ignore_chroms, only_chroms, verbose)
+
+    print_report(nuc_counts, verbose)
+
+def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename, 
+                    revcomp_strand, min_counts, 
+                    offset_min, offset_max, region_size,
+                    ignore_chroms, only_chroms, verbose):
+
+    ''' main routine for calculating nuc_counts) '''
+
     if verbose:
-        print >>sys.stderr, ">> analyzing sequences ..."
-        print >>sys.stderr, ">> ignore:%s only:%s" % \
+        msg =  ">> analyzing sequences ...\n"
+        msg += ">> ignore:%s only:%s\n" % \
             (str(ignore_chroms), str(only_chroms))
-        print >>sys.stderr, ">> offset range: %d to %d" % \
-            (offset_min, offset_max)
-        print >>sys.stderr, ">> region size: %d" % \
-            (region_size)
-        print >>sys.stderr, ">> revcomp strand: %s" % \
-            str(revcomp_strand)
-     
-    seqs = Fasta(fastafilename)
+        msg += ">> offset range: %d to %d\n" % (offset_min, offset_max)
+        msg += ">> region size: %d\n" % (region_size)
+        msg += ">> revcomp strand: %s\n" % str(revcomp_strand)
+        print >>sys.stderr, msg
+
+    seq_fasta = Fasta(fasta_filename)
 
     nuc_counts = defaultdict(Counter)
 
-    bgfiles = (posbedgraph, negbedgraph)
+    bedtools = (pos_signal_bedtool, neg_signal_bedtool)
     strands = ('+', '-')
 
     # total number of sites examined
     total_sites = 0
 
-    for bgfile, strand in izip(bgfiles, strands):
+    for bedtool, strand in izip(bgfiles, strands):
 
-        # filenames can be None
-        if not bgfile: continue
-
-        for row in reader(bgfile, header=BedGraphLine):
+        for row in bedtool:
 
             # skip data based on specified chromosomes
             if row.chrom in ignore_chroms:
@@ -74,13 +82,6 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             total_sites += 1
 
             for offset in range(offset_min, offset_max + 1):
-
-                # -15 ------------- 0 ------------- +15
-                #     TAGCTAGGCTAGCGACGTAGCGACTAGCA
-                # (+) -----------------------------
-                #                   >>>>>>>>>>>>>>>
-                #      <<<<<<<<<<<<<<
-                # (-) -----------------------------
 
                 # upstream offsets are negative values
                 if strand == '+':
@@ -101,9 +102,10 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                         # negative strand
                         end = start + region_size
 
+                # XXX: does this ever happen?
                 if start < 0: continue
 
-                nucs = seqs[row.chrom][start:end]
+                nucs = seq_fasta[row.chrom][start:end]
 
                 #  1. libs where the captured strand is sequenced
                 #     are the correct polarity as-is (i.e. Excision-seq
@@ -119,8 +121,14 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
                 if len(nucs.strip()) != region_size: continue
 
                 nuc_counts[offset][nucs] += row.count
-    # XXX
-    debug_report(nuc_counts)
+
+    return nuc_counts
+
+def print_report(nuc_counts, verbose):
+    ''' print report of nuc_counts with frequency calculations '''
+
+    if verbose:
+        debug_report(nuc_counts)
 
     # report the results
     header = ('#nuc','offset','region.size','count','freq','total.sites') 
@@ -137,7 +145,9 @@ def nuc_frequencies(posbedgraph, negbedgraph, fastafilename,
             print '\t'.join(vals)
 
 def debug_report(nuc_counts):
-    ''' debug counts at specific positions '''
+    ''' debug counts at specific positions. currently calculates the sum
+    of frequencies a the 3' most position '''
+
     for offset, counts in sorted(nuc_counts.items()):
 
         sum_counts = sum(counts.values())
@@ -153,40 +163,16 @@ def debug_report(nuc_counts):
             vals = map(str, ['#>>debug', nuc, offset, nucsum])
             print >>sys.stderr, '\t'.join(vals)
 
-class BedGraphLine:
-    ''' class for bedgraph row conversion '''
-    def __init__(self, inlist):
-        self.chrom = inlist[0]
-        self.start = int(inlist[1])
-        self.end = int(inlist[2])
-        self.count = int(inlist[3])
-    
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
 
-    usage = "%prog [OPTION]... -p POS_BEDGRAPH -n NEG_BEDGRAPH -f FASTA"
+    usage = "%prog [OPTION]... BAM_FILENAME FASTA_FILENAME"
     version = "%%prog %s" % __version__
     description = ("calculate nucleotide frequences at modified base "
                    "sites")
 
     parser = OptionParser(usage=usage, version=version,
                           description=description)
-
-    group = OptionGroup(parser, "Required")
-    group.add_option("-p", "--pos-bedgraph", action="store", type='string', 
-        metavar="POS_BEDGRAPH", default=None,
-        help="bedgraph data, positive strand"
-        " (default: %default)")
-    group.add_option("-n", "--neg-bedgraph", action="store", type='string', 
-        metavar="NEG_BEDGRAPH", default=None,
-        help="bedgraph data, negative strand"
-        " (default: %default)")
-    group.add_option("-f", "--fasta", action="store", type='string', 
-        metavar="FASTA", default=None,
-        help="FASTA file"
-        " (default: %default)")
-
-    parser.add_option_group(group)
 
     group = OptionGroup(parser, "Variables")
 
@@ -232,9 +218,9 @@ def parse_options(args):
 
     options, args = parser.parse_args(args)
 
-    if not options.fasta:
-        parser.error("specify fasta")
-  
+    if len(args) != 2:
+        parser.error("specify BAM and FASTA")
+
     if options.region_size <= 0:
         parser.error("region_size must be > 0")
        
@@ -244,6 +230,7 @@ def parse_options(args):
     return options, args
 
 def main(args=sys.argv[1:]):
+
     options, args = parse_options(args)
 
     ignore_chroms = tuple(options.ignore_chrom)
@@ -257,11 +244,11 @@ def main(args=sys.argv[1:]):
               'verbose':options.verbose,
               'ignore_chroms':ignore_chroms,
               'only_chroms':only_chroms}
-    pos_bedgraph = options.pos_bedgraph
-    neg_bedgraph = options.neg_bedgraph
-    fastafilename = options.fasta
-    return nuc_frequencies(pos_bedgraph, neg_bedgraph, fastafilename, 
-                           **kwargs)
+
+    bam_filename = args[0]
+    fasta_filename = args[1]
+
+    return nuc_frequencies(bam_filename, fasta_filename, **kwargs)
 
 if __name__ == '__main__':
     sys.exit(main()) 
