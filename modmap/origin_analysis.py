@@ -33,16 +33,17 @@ def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
     neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
                                        verbose=verbose) 
 
-    ori_signals = calc_origin_signals(origin_bedtool, pos_signal_bedtool,
+    ori_signals = calc_origin_signals(origin_bedtool,
+                                      pos_signal_bedtool,
                                       neg_signal_bedtool,
                                       chrom_sizes_filename,
                                       flank_size, verbose)
 
     origin_result = calc_origin_nuc_counts(ori_signals,
-                                               pos_signal_bedtool,
-                                               neg_signal_bedtool,
-                                               fasta_filename,
-                                               verbose)
+                                           pos_signal_bedtool,
+                                           neg_signal_bedtool,
+                                           fasta_filename,
+                                           verbose)
 
     print_report(origin_result, max_timing, flank_size, verbose)
 
