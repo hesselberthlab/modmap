@@ -32,8 +32,10 @@ flank_sizes=(1000 2500 5000)
 # XXX need to run module out of bin directory
 cd $BIN
 
+aligndir=$RESULT/$sample/alignment
+
 for align_mode in ${ALIGN_MODES[@]}; do
-    bam=$results/alignment/$sample.align.$align_mode.bam
+    BAM=$aligndir/$sample.align.$align_mode.bam
     result_tab="$results/origin_analysis.align.$align_mode.tab"
 
     # delete old results if exists - going to loop and append so need a
@@ -46,7 +48,7 @@ for align_mode in ${ALIGN_MODES[@]}; do
         for flank_size in ${flank_sizes[@]}; do
             python -m modmap.origin_analysis \
                 $origin_bed $timing_bedgraph \
-                $bam $FASTA $CHROM_SIZES \
+                $BAM $FASTA $CHROM_SIZES \
                 --max-timing $timing \
                 --flank-size $flank_size \
                 --verbose \

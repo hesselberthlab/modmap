@@ -29,6 +29,7 @@ else
                  "--ignore-chrom chrM")
 fi
 
+aligndir=$RESULT/$sample/alignment
 results=$RESULT/$sample/nuc_freqs
 if [[ ! -d $results ]]; then
     mkdir -p $results
@@ -39,7 +40,7 @@ cd $BIN
 
 for aln_idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$aln_idx]}
-    BAM=$results/alignment/$sample.align.$align_mode.bam
+    BAM=$aligndir/$sample.align.$align_mode.bam
 
     for ig_idx in ${!ignore_modes[@]}; do
 

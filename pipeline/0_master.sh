@@ -20,6 +20,7 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # reassign assembly-specific variables
     export ASSEMBLY=$assembly
+    # XXX DEBUG provides a directory extension, or nothing ("")
     export RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$assembly
 
     export BOWTIEIDX=$HOME/ref/genomes/$assembly/$assembly
