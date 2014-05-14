@@ -11,8 +11,9 @@ from operator import itemgetter
 from itertools import izip
 from collections import Counter, defaultdict
 
-from pybedtools import BedTool
 from pyfasta import Fasta, complement
+
+from .common import load_coverage
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -25,18 +26,18 @@ def nuc_frequencies(bam_filename, fasta_filename,
                     offset_min, offset_max, region_size,
                     ignore_chroms, only_chroms, verbose):
 
-    pos_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
-                                           strand='+')
-    neg_signal_bedtool = BedTool.genomecov(ibam=bam_filename, five=True,
-                                           strand='-')
+    pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
+                                       verbose=verbose) 
+    neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
+                                       verbose=verbose) 
 
-    nuc_counts = calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool,
-                                 seq_fasta, 
-                                 revcomp_strand, min_counts, 
-                                 offset_min, offset_max, region_size,
-                                 ignore_chroms, only_chroms, verbose)
+    total_sites, nuc_counts = calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool,
+                                              fasta_filename, 
+                                              revcomp_strand, min_counts, 
+                                              offset_min, offset_max, region_size,
+                                              ignore_chroms, only_chroms, verbose)
 
-    print_report(nuc_counts, verbose)
+    print_report(nuc_counts, region_size, total_sites, verbose)
 
 def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename, 
                     revcomp_strand, min_counts, 
@@ -64,7 +65,7 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
     # total number of sites examined
     total_sites = 0
 
-    for bedtool, strand in izip(bgfiles, strands):
+    for bedtool, strand in izip(bedtools, strands):
 
         for row in bedtool:
 
@@ -122,9 +123,9 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
 
                 nuc_counts[offset][nucs] += row.count
 
-    return nuc_counts
+    return total_sites, nuc_counts
 
-def print_report(nuc_counts, verbose):
+def print_report(nuc_counts, region_size, total_sites, verbose):
     ''' print report of nuc_counts with frequency calculations '''
 
     if verbose:
