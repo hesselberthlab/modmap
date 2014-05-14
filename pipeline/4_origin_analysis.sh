@@ -11,17 +11,8 @@ origin analysis
 DOC
 
 set -o nounset -o pipefail -o errexit -x
-source $HOME/devel/modmap/pipeline/config.sh
 
-# XXX TESTING
-#ASSEMBLY="sacCer2"
-#LSB_JOBINDEX=1
-#RESULT=$HOME/tmp/common$DEBUG/$ASSEMBLY
-#BOWTIEIDX=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY
-#CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-#GTF=$HOME/ref/genomes/$ASSEMBLY/sgdGene.$ASSEMBLY.gtf
-#FASTA=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.fa
- 
+source $HOME/devel/modmap/pipeline/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 # output directory
@@ -29,7 +20,6 @@ results=$RESULT/$sample/origin_analysis
 if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
-
 
 # origins and timing
 origin_bed=$DATA/$ASSEMBLY/oridb.confirmed.bed

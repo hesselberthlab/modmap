@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
+
 #BSUB -J nuc.freqs[1-10]
 #BSUB -e nuc.freqs.%J.%I.err
 #BSUB -o nuc.freqs.%J.%I.out
@@ -11,7 +12,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/projects/collab/storici-lab/bin/config.sh
+source $HOME/devel/modmap/pipeline/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 # mono, di and trinucleotides

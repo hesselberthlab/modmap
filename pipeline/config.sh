@@ -1,5 +1,8 @@
 PROJECTID=storici-lab
 
+# this sets the RESULT directory to "common-debug"
+DEBUG="-debug"
+
 SAMPLES=(FS1 FS2 FS3 FS4 FS5 FS6 FS7 FS8 FS9 FS10)
 NUM_SAMPLES=${#SAMPLES[@]}
 # SAMPLES and DESCRIPS must be in same order
@@ -19,14 +22,14 @@ DESCRIPS=("YFP17, rnh1 rnh201 / RE"
 #RESULT=$HOME/projects/collab/storici-lab/results/common/$ASSEMBLY
 #FASTA=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.fa
 #CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-# GTF=$HOME/ref/genomes/$ASSEMBLY/sgdGene.$ASSEMBLY.gtf
+#GTF=$HOME/ref/genomes/$ASSEMBLY/sgdGene.$ASSEMBLY.gtf
+#EXPPOS=$DATA/$ASSEMBLY/regev.exp.pos.bg
+#EXPNEG=$DATA/$ASSEMBLY/regev.exp.neg.bg
 
 DATA=$HOME/projects/collab/storici-lab/data/common
-BIN=$HOME/devel/modmap/modmap
+BIN=$HOME/devel/modmap
 RSCRIPTS=$HOME/devel/modmap/R
 UMI=NNNNNNNN
 ALIGN_MODES=("uniq" "all")
 ALIGN_ARGS=("-m 1" "--all")
-EXPPOS=$DATA/$ASSEMBLY/regev.exp.pos.bg
-EXPNEG=$DATA/$ASSEMBLY/regev.exp.neg.bg
 METADATA=$DATA/metadata.tsv
