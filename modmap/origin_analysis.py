@@ -6,6 +6,7 @@
 import sys
 import pdb
 
+from operator import itemgetter
 from collections import defaultdict
 
 from pybedtools import BedTool
@@ -37,13 +38,36 @@ def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
                                       chrom_sizes_filename,
                                       flank_size, verbose)
 
-    origin_nuc_counts = calc_origin_nuc_counts(ori_signals,
+    origin_result = calc_origin_nuc_counts(ori_signals,
                                                pos_signal_bedtool,
                                                neg_signal_bedtool,
                                                fasta_filename,
                                                verbose)
 
-    pdb.set_trace()
+    print_report(origin_result, max_timing, flank_size, verbose)
+
+def print_report(origin_result, max_timing, flank_size, verbose):
+    ''' print report of nuc_counts with frequency calculations '''
+
+    header = ('#nuc','offset','count','freq','total.sites',
+              'max.timing','flank.size','strand',) 
+    print '\t'.join(header)
+
+    for strand, tup in origin_result.items():
+        total_sites, nuc_counts = tup
+
+        for offset, counts in sorted(nuc_counts.items()):
+            sum_counts = sum(counts.values())
+
+            for nuc, count in sorted(counts.items(), key=itemgetter(1), \
+                                     reverse=True):
+
+                freq = float(count) / float(sum_counts)
+
+                vals = map(str, [nuc, offset, count, freq, total_sites,
+                                 max_timing, flank_size, strand])
+
+                print '\t'.join(vals)
 
 def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
                            neg_signal_bedtool, fasta_filename, verbose):
@@ -76,6 +100,9 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
     strand_args['lagging'] = {'pos':('neg','left'),
                               'neg':('pos','right')}
 
+    if verbose:
+        print >>sys.stderr, ">> calculating nuc frequencies ..."
+
     for ori_strand in strand_args.keys():
 
         # index 0 = strand; index 1 = side
@@ -84,15 +111,15 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
         pos_side_arg = strand_args[ori_strand]['pos'][1]
         neg_side_arg = strand_args[ori_strand]['neg'][1]
 
-        pos_signal = ori_signals[pos_strand_arg][pos_side_arg]
-        neg_signal = ori_signals[neg_strand_arg][neg_side_arg]
+        pos_signal_bedtool = ori_signals[pos_strand_arg][pos_side_arg]
+        neg_signal_bedtool = ori_signals[neg_strand_arg][neg_side_arg]
 
-        counts = calc_nuc_counts(pos_signal_bedtool,
+        total_sites, nuc_counts = calc_nuc_counts(pos_signal_bedtool,
                                  neg_signal_bedtool, 
                                  fasta_filename,
                                  **kwargs)
 
-        result[ori_strand] = counts
+        result[ori_strand] = (total_sites, nuc_counts)
 
     return result
 
