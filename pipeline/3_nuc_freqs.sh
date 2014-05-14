@@ -28,18 +28,17 @@ else
                  "--ignore-chrom chrM")
 fi
 
-bedgraphs=$RESULT/$sample/bedgraphs
 results=$RESULT/$sample/nuc_freqs
-
 if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
 
+# need to be in BIN to run module
+cd $BIN
+
 for aln_idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$aln_idx]}
-
-    posbedgraph=$bedgraphs/$sample.align.$align_mode.strand.pos.counts.bg
-    negbedgraph=$bedgraphs/$sample.align.$align_mode.strand.neg.counts.bg
+    BAM=$results/alignment/$sample.align.$align_mode.bam
 
     for ig_idx in ${!ignore_modes[@]}; do
 
@@ -47,21 +46,21 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         ignore_arg=${ignore_args[$ig_idx]}
 
         output="$results/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
+        if [[ -f $output ]]; then
+            rm -f $output
+        fi
 
         # signals need to be reverse complemented because the sequence is
         # the reverse complement of the captured strand
         for size in $sizes; do
-            python $BIN/nuc_frequencies.py \
-                --revcomp-strand \
+            python -m modmap.nuc_frequencies \
+                $BAM $FASTA \
                 --region-size $size \
-                -p $posbedgraph \
-                -n $negbedgraph \
-                -f $FASTA \
                 $ignore_arg \
-                --verbose >> $output
+                --revcomp-strand \
+                --verbose \
+                >> $output
         done
-
-        gzip $output
     done
 done
 
