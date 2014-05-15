@@ -35,8 +35,7 @@ for strand in ${strands[@]}; do
         clipped_peak=${peakbase}_peaks.bed.clipped
 
         # combined peaks with appropriate strand column
-        peak=$result/${sample}_peaks.bed.gz
-   
+        peak=$peakresults/${sample}_peaks.bed.gz
         bam=$results/alignment/$sample.align.$align_mode.bam
 
         if [[ ! -f $bam ]]; then
