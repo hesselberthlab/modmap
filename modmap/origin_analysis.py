@@ -148,10 +148,10 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
     for strand in STRANDS:
         for side in SIDES:
 
-            signal_bt = signals[strand]
-            flank_bt = flanks[side]
+            signal_bedtool = signals[strand]
+            flank_bedtool = flanks[side]
 
-            result[strand][side] = signal_bt.intersect(flank_bt)
+            result[strand][side] = signal_bedtool.intersect(flank_bedtool)
 
     return result
 
