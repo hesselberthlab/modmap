@@ -25,7 +25,7 @@ strands=("all" "pos" "neg")
 for strand in ${strands[@]}; do
     for align_mode in ${ALIGN_MODES[@]}; do
 
-        peakbase=$peakresults.$strand
+        peakbase=$peakresults/$sample.$strand
         peak=${peakbase}_peaks.bed
         narrowpeak=${peakbase}_peaks.narrowPeak
         summit=${peakbase}_summits.bed
@@ -35,7 +35,6 @@ for strand in ${strands[@]}; do
         clipped_peak=${peakbase}_peaks.bed.clipped
 
         # combined peaks with appropriate strand column
-        peak=$peakresults/${sample}_peaks.bed.gz
         bam=$results/alignment/$sample.align.$align_mode.bam
 
         if [[ ! -f $bam ]]; then
@@ -43,14 +42,14 @@ for strand in ${strands[@]}; do
             exit 1
         fi
 
-        if [[ ! -f $peak.gz ]]; then
+        if [[ ! -f "$peak.gz" ]]; then
             macs2 callpeak -t $bam -n $peakbase --keep-dup auto \
                 --nomodel -s 25 --extsize 5 --call-summits
             cut -f1-4 $narrowpeak > $peak
             bedClip $peak $CHROM_SIZES $clipped_peak
             mv $clipped_peak $peak
             gzip -f $peak $narrowpeak
-            rm -f $xls $summit
+            # rm -f $xls $summit
         fi
     done
 done
