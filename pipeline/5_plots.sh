@@ -10,8 +10,7 @@
 DOC
 
 set -o nounset -o pipefail -o errexit -x
-
-source $HOME/projects/collab/storici-lab/bin/config.sh
+source $HOME/devel/modmap/pipeline/config.sh
 
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 results=$RESULT/$sample
@@ -37,9 +36,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         ignore_mode=${ignore_modes[$ig_idx]}
 
-        # -------------------------------------------------------
         # --- nuc_freq plots ------------------------------------
-        # plottypes=("hist" "scatter")
         plottypes=("scatter")
         for plot_type in ${plottypes[@]}; do
 
@@ -48,13 +45,12 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
                 mkdir -p $subplotdir
             fi
 
-            counts="$results/nuc_freqs/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab.gz"
+            counts="$results/nuc_freqs/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
             sampleid="$sample.align-$align_mode.subset-$ignore_mode"
             Rscript $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $plot_type $subplotdir
 
         done
 
-        # -------------------------------------------------------
         # --- origin plots --------------------------------------
         subplotdir="$plotdir/origin_analysis"
         if [[ ! -d $subplotdir ]]; then
@@ -62,7 +58,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         fi
 
         if [[ $ignore_mode != 'only-mito' && $ignore_mode != 'only-2micron' ]]; then
-            counts="$results/origin_analysis/combined.align.$align_mode.ignore.$ignore_mode.tab"
+            counts="$results/origin_analysis/origin_analysis.align.$align_mode.tab"
             sampleid="$sample.align-$align_mode.subset-$ignore_mode"
             Rscript $RSCRIPTS/origin.plots.R $counts "$sampleid" $subplotdir
         fi
