@@ -13,10 +13,11 @@ set -o nounset -o pipefail -o errexit -x
 
 ASSEMBLIES=("sacCer1" "sacCer2" "sacCer3")
 export PIPELINE=$HOME/devel/modmap/pipeline
+export CONFIG=$PIPELINE/config.sh
 
 for assembly in ${ASSEMBLIES[@]}; do
 
-    source $PIPELINE/config.sh
+    source $CONFIG
 
     # reassign assembly-specific variables
     export ASSEMBLY=$assembly
@@ -28,9 +29,11 @@ for assembly in ${ASSEMBLIES[@]}; do
     
     job_array="[1-$NUM_SAMPLES]"
 
+    # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
 
+    # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
