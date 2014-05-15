@@ -15,12 +15,17 @@ source $HOME/devel/modmap/pipeline/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 results=$RESULT/$sample
 peakresults=$results/peaks
+
+if [[ ! -f $peakresults ]]; then
+    mkdir -p $peakresults
+fi
+
 strands=("all" "pos" "neg")
 
 for strand in ${strands[@]}; do
     for align_mode in ${ALIGN_MODES[@]}; do
 
-        peakbase=$peaksresults.$strand
+        peakbase=$peakresults.$strand
         peak=${peakbase}_peaks.bed
         narrowpeak=${peakbase}_peaks.narrowPeak
         summit=${peakbase}_summits.bed
