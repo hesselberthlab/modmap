@@ -21,7 +21,8 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # reassign assembly-specific variables
     export ASSEMBLY=$assembly
-    # XXX DEBUG provides a directory extension, or nothing ("")
+    # XXX DEBUG provides a directory extension ("common-debug"), or
+    # nothing ("common")
     export RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$assembly
 
     export BOWTIEIDX=$HOME/ref/genomes/$assembly/$assembly
@@ -34,6 +35,11 @@ for assembly in ${ASSEMBLIES[@]}; do
     # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
+
+    # XXX testing
+    bsub -J "peaks_$ASSEMBLY$job_array" \
+        -w "done('align_$ASSEMBLY[*]')" \
+        < $PIPELINE/peaks.sh
 
     # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
