@@ -10,7 +10,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/devel/modmap/pipeline/storici/config.sh
+source $CONFIG
 
 # this grabs colors for each sample
 num_colors=${#SAMPLES[@]}
