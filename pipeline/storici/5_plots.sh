@@ -32,6 +32,16 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
     align_mode=${ALIGN_MODES[$aln_idx]}
 
+    # --- origin plots --------------------------------------
+    subplotdir="$plotdir/origin_analysis"
+    if [[ ! -d $subplotdir ]]; then
+        mkdir -p $subplotdir
+    fi
+
+    counts="$results/origin_analysis/origin_analysis.align.$align_mode.tab"
+    sampleid="$sample.align-$align_mode"
+    Rscript $RSCRIPTS/origin.plots.R $counts "$sampleid" $subplotdir
+
     for ig_idx in ${!ignore_modes[@]}; do
 
         ignore_mode=${ignore_modes[$ig_idx]}
@@ -51,17 +61,6 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         done
 
-        # --- origin plots --------------------------------------
-        subplotdir="$plotdir/origin_analysis"
-        if [[ ! -d $subplotdir ]]; then
-            mkdir -p $subplotdir
-        fi
-
-        if [[ $ignore_mode != 'only-mito' && $ignore_mode != 'only-2micron' ]]; then
-            counts="$results/origin_analysis/origin_analysis.align.$align_mode.tab"
-            sampleid="$sample.align-$align_mode.subset-$ignore_mode"
-            Rscript $RSCRIPTS/origin.plots.R $counts "$sampleid" $subplotdir
-        fi
     done
 done
 
