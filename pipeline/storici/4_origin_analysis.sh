@@ -12,7 +12,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/devel/modmap/pipeline/config.sh
+source $HOME/devel/modmap/pipeline/storici/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 # output directory

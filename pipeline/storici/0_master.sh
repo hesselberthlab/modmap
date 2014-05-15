@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #BSUB -J master
 #BSUB -e master.%J.err
 #BSUB -o master.%J.out
@@ -12,7 +13,7 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 ASSEMBLIES=("sacCer1" "sacCer2" "sacCer3")
-export PIPELINE=$HOME/devel/modmap/pipeline
+export PIPELINE=$HOME/devel/modmap/pipeline/storici
 export CONFIG=$PIPELINE/config.sh
 
 for assembly in ${ASSEMBLIES[@]}; do
@@ -43,7 +44,7 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
-        -w "done('align_$ASSEMBLY[*]')" \
+        -w "done('peaks_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
