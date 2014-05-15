@@ -20,9 +20,10 @@ infile = output[1]
 sample.name = output[2]
 output.dir = output[3]
 
-COLNAMES <- c('nuc','offset','size','count','freq',
-              'total.sites','direction','sample.id',
-              'trep', 'flank.size')
+COLNAMES <- c('nuc','offset','count','freq',
+              'total.sites','max.timing',
+              'flank.size','strand')
+
 df <- read.table(infile, col.names=COLNAMES)
 if (nrow(df) == 0) {
     warning("empty data frame")
@@ -30,60 +31,58 @@ if (nrow(df) == 0) {
 }
 head(df)
 
-# stats for the table
-max.trep <- df$trep[1]
-flank.size <- df$flank.size[1]
+origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 
-nuc.freq.ggplot <- function(df, sample.name, ... ) {
+    gp <- ggplot(data = df, 
+                 aes(x=offset, y=count, fill=nuc))
 
-    gp <- ggplot(data = df,
-                 aes(nuc, freq, offset, direction))
-
-    gp <- gp + geom_bar(stat = 'identity', aes(fill = factor(nuc)))
-    gp <- gp + facet_grid(direction ~ offset)
+    gp <- gp + geom_bar(stat='identity', position='dodge')
+    gp <- gp + facet_grid(strand ~ max.timing + flank.size)
     gp <- gp + theme(legend.position = 'none')
+    gp <- gp + scale_fill_brewer(palette="Set1")
 
     gp <- gp + theme_bw()
 
     # axis labels 
-    gp <- gp + xlab('Nucleotides')
-    gp <- gp + ylab('Frequency')
+    gp <- gp + xlab('Offset')
+    gp <- gp + ylab('Nucleotide counts')
 
     # add title
-    title.top = paste('modmap origin-analysis\n',
+    title.top = paste('modmap origin-analysis (per-nuc counts)\n',
                       '(sample = ', sample.name, 
-                      ' Trep max = ', max.trep,
-                      ' Flank size = ', flank.size,
                       ')', sep='')
-    title.bottom = ""
+    title.bottom = "top row = max.timing; bottom row = flank.size"
     title = paste(title.top, title.bottom, sep='\n')
     gp <- gp + ggtitle(title)
 
     return(gp)
 }
 
-origin.count.ggplot <- function(df, sample.name, ...) {
+origin.agg.count.ggplot <- function(df, sample.name, ...) {
   
-  gp <- ggplot(data = df, aes(direction, count))
-  gp <- gp + geom_bar(stat='identity')
-  
-  gp <- gp + theme_bw()
-  # axis labels 
-  gp <- gp + xlab('Direction')
-  gp <- gp + ylab('Count')
-  
-  return(gp)
+    gp <- ggplot(data = df,
+                 aes(nuc, freq, offset, direction))
+
+    gp <- gp + geom_bar(stat='identity')
+
+    gp <- gp + theme_bw()
+    # axis labels 
+    gp <- gp + xlab('Direction')
+    gp <- gp + ylab('Count')
+
+    return(gp)
 }
 
-gp.nuc.freq <- nuc.freq.ggplot(df, sample.name)
-gp.origin.count <- origin.count.ggplot(df, sample.name)
+# gp.origin.freq <- origin.freq.ggplot(df, sample.name)
+gp.origin.count <- origin.nuc.count.ggplot(df, sample.name)
 
 # write the files
-freq.pdf.filename <- paste(output.dir, '/', 'modmap.origin.freq',
-                      '.', sample.name, '.pdf', sep='')
-ggsave(filename = freq.pdf.filename, plot = gp.nuc.freq, device = CairoPDF)
+#freq.pdf.filename <- paste(output.dir, '/', 'modmap.origin.freq',
+#                      '.', sample.name, '.pdf', sep='')
+#ggsave(filename = freq.pdf.filename, plot = gp.nuc.freq, device = CairoPDF)
 
 count.pdf.filename <- paste(output.dir, '/', 'modmap.origin.counts',
                            '.', sample.name, '.pdf', sep='')
-ggsave(filename = count.pdf.filename, plot = gp.origin.count, device = CairoPDF)
+ggsave(filename = count.pdf.filename, plot = gp.origin.count,
+       height = 8.5, width = 11, device = CairoPDF)
 
