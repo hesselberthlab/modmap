@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 
 #BSUB -J ori.analysis[1-10]
 #BSUB -e ori.analysis.%J.%I.err
@@ -8,139 +8,51 @@
 
 <<DOC
 origin analysis
-1. select origin flanks for analysis based on timing data
-2. analyze signal in flanks and assign to leading or laggin
 DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/projects/collab/storici-lab/bin/config.sh
+source $HOME/devel/modmap/pipeline/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
-# count data
-bedgraphs=$RESULT/$sample/bedgraphs
 # output directory
 results=$RESULT/$sample/origin_analysis
-
-# origins and timing
-oribed=$DATA/$ASSEMBLY/oridb.confirmed.bed
-timingbg=$DATA/$ASSEMBLY/yabuki.timing.bedgraph
-
-# XXX origin variables
-max_timing=20
-flank_size=1000
-
-strands=("pos" "neg")
-# XXX: upstream and downstream maybe more acc
-sides=("left" "right")
-directions=("leading" "lagging")
-
-if [[ $ASSEMBLY == "sacCer2" ]]; then
-    ignore_modes=("all" "only-mito" "no-mito" "only-2micron")
-    ignore_args=("" "--only-chrom chrM"
-                 "--ignore-chrom chrM"
-                 "--only-chrom 2micron")
-else
-    ignore_modes=("all" "only-mito" "no-mito")
-    ignore_args=("" "--only-chrom chrM"
-                 "--ignore-chrom chrM")
-fi
-
 if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
 
-# selecte origins for analysis
-selectoritab="$results/selected.origins.tab"
-selectoribed="$results/selected.origins.bed"
-bedtools intersect -wb -a $oribed -b $timingbg \
-    | bedtools groupby -g 4 -c 10 -o mean \
-    | awk -v TIMING=$max_timing '$2 < TIMING' \
-    | cut -f1 \
-    > $selectoritab
+# origins and timing
+origin_bed=$DATA/$ASSEMBLY/oridb.confirmed.bed
+timing_bedgraph=$DATA/$ASSEMBLY/yabuki.timing.bedgraph
 
-for oriname in $(cat $selectoritab); do
-    cat $oribed \
-    | awk -v NAME=$oriname '$4 == NAME'
-done > $selectoribed
+# origin variables
+timing_cutoffs=(20 25 30 35)
+flank_sizes=(1000 2500 5000 10000)
 
-# make flanks for origins - writing loop not worth it
-left_origins="$results/origins.left.flank.bed"
-right_origins="$results/origins.right.flank.bed"
-bedtools flank -i $selectoribed -l $flank_size -r 0 -g $CHROM_SIZES > $left_origins
-bedtools flank -i $selectoribed -r $flank_size -l 0 -g $CHROM_SIZES > $right_origins
+# XXX need to run module out of bin directory
+cd $BIN
 
-# analysis is run for each alignment mode
+aligndir=$RESULT/$sample/alignment
+
 for align_mode in ${ALIGN_MODES[@]}; do
+    BAM=$aligndir/$sample.align.$align_mode.bam
+    result_tab="$results/origin_analysis.align.$align_mode.tab"
 
-    # generate signal for each strand and side
-    for strand in ${strands[@]}; do
-        signal_bg="$bedgraphs/$sample.align.$align_mode.strand.$strand.counts.bg"
+    # delete old results if exists - going to loop and append so need a
+    # fresh empty file
+    if [[ -f $result_tab ]]; then
+        rm -f $result_tab
+    fi
 
-        for side in ${sides[@]}; do
-            origin_bed="$results/origins.$side.flank.bed"
-            result_bg="$results/$sample.align.$align_mode.strand.$strand.side.$side.origin.counts.bg"
-
-            bedtools intersect -a $signal_bg -b $origin_bed > $result_bg
+    for timing in ${timing_cutoffs[@]}; do
+        for flank_size in ${flank_sizes[@]}; do
+            python -m modmap.origin_analysis \
+                $origin_bed $timing_bedgraph \
+                $BAM $FASTA $CHROM_SIZES \
+                --max-timing $timing \
+                --flank-size $flank_size \
+                --verbose \
+                >> $result_tab
         done
-    done
-
-    # analyze signal on leading and lagging directions
-    for ignore_idx in ${!ignore_modes[@]}; do
-
-        ignore_mode=${ignore_modes[$ignore_idx]}
-        ignore_arg=${ignore_args[$ignore_idx]}
-
-        for direction in ${directions[@]}; do
-
-            #                       _______________
-            #                      / <----         \
-            # 5'                  /                 \                   3'
-            # ===================/                   \====================
-            # ===================\                   /====================
-            # 3'                  \        ---->     /                   5'
-            #                      \_______________/
-
-            # Leading signals are the captured negative strand (i.e. pos
-            # strand sequences) upstream
-            # (left) ofthe origin; captured positive strand (i.e. neg
-            # strand sequences downstream
-            # (right) of origin
-
-            if [[ $direction == "lagging" ]]; then
-                # - lagging strand = -p $neg_left_bedgraph -n $pos_right_bedgraph
-                pos_bg="$results/$sample.align.$align_mode.strand.neg.side.left.origin.counts.bg"
-                neg_bg="$results/$sample.align.$align_mode.strand.pos.side.right.origin.counts.bg"
-                result_tab="$results/lagging.align.$align_mode.ignore.$ignore_mode.origin.nuc_counts.tab"
-
-            elif [[ $direction == "leading" ]]; then
-                # - leading strand = -p $neg_right_bedgraph -n $pos_left_bedgraph
-                pos_bg="$results/$sample.align.$align_mode.strand.pos.side.left.origin.counts.bg"
-                neg_bg="$results/$sample.align.$align_mode.strand.neg.side.right.origin.counts.bg"
-                result_tab="$results/leading.align.$align_mode.ignore.$ignore_mode.origin.nuc_counts.tab"
-            fi
-
-            # delete old results if exists
-            if [[ -f $result_tab ]]; then
-                rm -f $result_tab
-            fi
-
-            # offsets are with respect to base in question:
-            # 0 = ribo, -1 = upstream, 1 = downstream
-            python $BIN/nuc_frequencies.py \
-                --revcomp-strand \
-                --offset-min -1 --offset-max 1 --region-size 1 \
-                -p $pos_bg -n $neg_bg -f $FASTA \
-                $ignore_arg \
-                | awk -v ID=$sample -v DIR=$direction \
-                      -v TREP=$max_timing -v FLANK=$flank_size \
-                    '{print $0, "\t", DIR, "\t", ID, "\t",\
-                      TREP, "\t", FLANK}' \
-                > $result_tab
-        done
-
-        # combine results into 1 file
-        combined="$results/combined.align.$align_mode.ignore.$ignore_mode.tab"
-        cat $results/*align.$align_mode.ignore.$ignore_mode.*.tab >> $combined
     done
 done

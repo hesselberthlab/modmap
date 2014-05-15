@@ -15,9 +15,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-# CONFIG provided by master.sh
-source $CONFIG 
-
+source $HOME/devel/modmap/pipeline/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 unprocessed_fastq=$DATA/$sample.fq.gz

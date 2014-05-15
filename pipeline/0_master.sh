@@ -21,11 +21,13 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # reassign assembly-specific variables
     export ASSEMBLY=$assembly
+    # XXX DEBUG provides a directory extension, or nothing ("")
+    export RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$assembly
+
     export BOWTIEIDX=$HOME/ref/genomes/$assembly/$assembly
     export CHROM_SIZES=$HOME/ref/genomes/$assembly/$assembly.chrom.sizes
     export GTF=$HOME/ref/genomes/$assembly/sgdGene.$assembly.gtf
     export FASTA=$HOME/ref/genomes/$assembly/$assembly.fa
-    export RESULT=$HOME/projects/collab/storici-lab/results/common/$assembly
     
     job_array="[1-$NUM_SAMPLES]"
 
