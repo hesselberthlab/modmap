@@ -39,7 +39,8 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
         # -------------------------------------------------------
         # --- nuc_freq plots ------------------------------------
-        plottypes=("hist" "scatter")
+        # plottypes=("hist" "scatter")
+        plottypes=("scatter")
         for plot_type in ${plottypes[@]}; do
 
             subplotdir="$plotdir/nuc_freqs/$plot_type"
