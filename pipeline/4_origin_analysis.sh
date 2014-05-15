@@ -27,7 +27,7 @@ timing_bedgraph=$DATA/$ASSEMBLY/yabuki.timing.bedgraph
 
 # origin variables
 timing_cutoffs=(20 25 30 35)
-flank_sizes=(1000 2500 5000)
+flank_sizes=(1000 2500 5000 10000)
 
 # XXX need to run module out of bin directory
 cd $BIN
