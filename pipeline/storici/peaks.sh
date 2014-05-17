@@ -13,8 +13,10 @@ set -o nounset -o pipefail -o errexit -x
 
 source $CONFIG
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
+
 results=$RESULT/$sample
 peakresults=$results/peaks
+
 # yeast genome size
 genomesize=12e6
 
@@ -54,7 +56,7 @@ for strand in ${strands[@]}; do
                 --gsize $genomesize \
                 --call-summits \
             cut -f1-4 $narrowpeak > $peak
-            gzip -f $peak $narrowpeak
+            # gzip -f $peak $narrowpeak
             # rm -f $xls $summit
         fi
     done
