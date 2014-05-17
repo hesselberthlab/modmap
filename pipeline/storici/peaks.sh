@@ -13,8 +13,16 @@ set -o nounset -o pipefail -o errexit -x
 
 source $CONFIG
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
+
 results=$RESULT/$sample
 peakresults=$results/peaks
+
+# yeast genome size
+genomesize=12e6
+
+# narrowPeak autosql
+ucscdir=/vol1/software/modules-sw/ucsc/build/v286
+asfile=$ucscdir/kent/src/hg/lib/encode/narrowPeak.as
 
 if [[ ! -f $peakresults ]]; then
     mkdir -p $peakresults
@@ -25,14 +33,10 @@ strands=("all" "pos" "neg")
 for strand in ${strands[@]}; do
     for align_mode in ${ALIGN_MODES[@]}; do
 
-        peakbase=$peakresults/$sample.$strand
-        peak=${peakbase}_peaks.bed
-        narrowpeak=${peakbase}_peaks.narrowPeak
-        summit=${peakbase}_summits.bed
-        xls=${peakbase}_peaks.xls
-
-        # some peaks were extending outside of genomic coords
-        clipped_peak=${peakbase}_peaks.bed.clipped
+        exp_name=$peakresults/$sample.$strand
+        peak=${exp_name}_peaks.bed
+        narrowpeak=${exp_name}_peaks.narrowPeak
+        bigbed=${exp_name}_peaks.bb
 
         # combined peaks with appropriate strand column
         bam=$results/alignment/$sample.align.$align_mode.bam
@@ -42,14 +46,16 @@ for strand in ${strands[@]}; do
             exit 1
         fi
 
-        if [[ ! -f "$peak.gz" ]]; then
-            macs2 callpeak -t $bam -n $peakbase --keep-dup auto \
-                --nomodel -s 25 --extsize 5 --call-summits
-            cut -f1-4 $narrowpeak > $peak
-            bedClip $peak $CHROM_SIZES $clipped_peak
-            mv $clipped_peak $peak
-            gzip -f $peak $narrowpeak
-            # rm -f $xls $summit
-        fi
+        macs2 callpeak -t $bam \
+            -n $exp_name \
+            --keep-dup all \
+            --nomodel \
+            -s 25 \
+            --extsize 5 \
+            --gsize $genomesize \
+            --call-summits
+        
+        bedToBigBed -type=bed6+4 -as=$asfile \
+            $narrowpeak $CHROM_SIZES $bigbed
     done
 done
