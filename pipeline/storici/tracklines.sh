@@ -31,7 +31,6 @@ raghu_timing=""
 exp_pos=""
 exp_neg=""
 
-
 for sample_idx in ${!SAMPLES[@]}; do
 
     # provided by config.sh
@@ -50,8 +49,8 @@ for sample_idx in ${!SAMPLES[@]}; do
             track_color="color=$color"
 
             #bigbed tracks
-            bigbed="$bigbeddir/$sample.$strand.align.$align_peaks.bb"
-            bigbed_name="name='$sample $strand $align_mode peaks"
+            bigbed="$bigbeddir/${sample}.${strand}.align.${align_mode}_peaks.bb"
+            bigbed_name="name='${sample} ${strand} ${align_mode} peaks"
             bigbed_descrip="description='$descrip PEAKS sample=$sample \
                             strand=$strand \
                             align.mode=$align_mode '"
@@ -59,14 +58,14 @@ for sample_idx in ${!SAMPLES[@]}; do
             bigbed_track="track type=bigBed"
             bigbed_url="bigDataUrl=$bigbed"
             bigbed_vis="visibility=squish"
-            bigbed_trackline="$trackbase $bigbed_url $bigbed_name \
+            bigbed_trackline="$bigbed_track $bigbed_url $bigbed_name \
                               $bigbed_descrip $track_color $bigbed_vis"
 
             # print the line
             echo $bigbed_trackline >> $tracklinefile
 
             # bigWig tracks
-            bigwig="$bigwigdir/$sample.align.$align_mode.strand.$strand.counts.bw"
+            bigwig="$bigwigdir/${sample}.align.${align_mode}.strand.${strand}.counts.bw"
             bigwig_name="name='$sample $strand $align_mode'"
             bigwig_descrip="description='$descrip sample=$sample strand=$strand \
                             align.mode=$align_mode'"
@@ -75,7 +74,8 @@ for sample_idx in ${!SAMPLES[@]}; do
             bigwig_track="track type=bigWig"
             bigwig_url="bigDataUrl=$bigwig"
             bigwig_vis="visibility=full"
-            bigwig_trackline="$trackbase $url $name $description $color \
+            bigwig_trackline="$bigwig_track $bigwig_url $bigwig_name \
+                              $bigwig_descrip $track_color \
                               $bigwig_vis $bigwig_height"
 
             # print the line
