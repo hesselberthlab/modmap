@@ -60,6 +60,6 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     bsub -J "tracklines_$ASSEMBLY" \
         -w "done('origin_anal_$ASSEMBLY')" \
-        < $PIPELINE/10_tracklines.sh
+        < $PIPELINE/tracklines.sh
 
 done
