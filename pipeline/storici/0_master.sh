@@ -12,7 +12,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-ASSEMBLIES=("sacCer1" "sacCer2" "sacCer3")
+export ASSEMBLIES=("sacCer1" "sacCer2" "sacCer3")
 export PIPELINE=$HOME/devel/modmap/pipeline/storici
 export CONFIG=$PIPELINE/config.sh
 
@@ -45,22 +45,23 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
-        -w "done('peaks_$ASSEMBLY[*]')" \
+        -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
     sleep 1
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
-        -w "done('coverage_$ASSEMBLY[*]')" \
+        -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/3_nuc_freqs.sh
     sleep 1
 
     bsub -J "origin_anal_$ASSEMBLY$job_array" \
-        -w "done('nuc_freqs_$ASSEMBLY[*]')" \
+        -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/4_origin_analysis.sh
     sleep 1
 
     bsub -J "plots_$ASSEMBLY$job_array" \
-        -w "done('origin_anal_$ASSEMBLY[*]')" \
+        -w "done('origin_anal_$ASSEMBLY[*]') && \
+            done('nuc_freqs_$ASSEMBLY[*]')" \
         < $PIPELINE/5_plots.sh
     sleep 1
 
