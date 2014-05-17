@@ -37,7 +37,6 @@ for assembly in ${ASSEMBLIES[@]}; do
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
 
-    # XXX testing
     bsub -J "peaks_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/peaks.sh
@@ -58,5 +57,9 @@ for assembly in ${ASSEMBLIES[@]}; do
     bsub -J "plots_$ASSEMBLY$job_array" \
         -w "done('origin_anal_$ASSEMBLY[*]')" \
         < $PIPELINE/5_plots.sh
+
+    bsub -J "tracklines_$ASSEMBLY" \
+        -w "done('origin_anal_$ASSEMBLY')" \
+        < $PIPELINE/10_tracklines.sh
 
 done
