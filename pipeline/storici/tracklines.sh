@@ -23,6 +23,15 @@ if [[ -f $tracklinefile ]]; then
     rm -f $tracklinefile
 fi
 
+# auxilliary tracks
+# replication timing
+yabuki_timing=""
+raghu_timing=""
+# mrna exp levels
+exp_pos=""
+exp_neg=""
+
+
 for sample_idx in ${!SAMPLES[@]}; do
 
     # provided by config.sh
