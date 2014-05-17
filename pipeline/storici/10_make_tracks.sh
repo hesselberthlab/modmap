@@ -12,60 +12,66 @@ set -o nounset -o pipefail -o errexit -x
 
 source $CONFIG
 
-# this grabs colors for each sample
-num_colors=${#SAMPLES[@]}
-color_str=$(python -c "import colorbrewer; print colorbrewer.Paired[$num_colors]" \
-    | sed 's/ //g; s/(/"/g;s/)/"/g; s/","/ /g; s/"//g; s/\[//g; s/\]//g')
-colors=(`echo ${color_str}`)
-
 urlbase="http://amc-sandbox.ucdenver.edu"
 strands=("both" "pos" "neg")
 umi_types=("removed" "UMIs_not_removed")
 
 tracklinefile=$RESULT/tracklines.txt
 
+# remove old file if exists b/c we're cat'ing
 if [[ -f $tracklinefile ]]; then
     rm -f $tracklinefile
 fi
 
 for sample_idx in ${!SAMPLES[@]}; do
 
+    # provided by config.sh
     sample=${SAMPLES[$sample_idx]}
-    webpath="~jhessel/projects/storici/results/common/$ASSEMBLY/$sample/bedgraphs"
-    color="color=${colors[$sample_idx]}"
-    height="maxHeightPixels=50:35:35"
+    color=${COLORS[$sample_idx]}
+    descrip=${DESCRIPS[$sample_ids]}
 
-    # keep these loops in order so that align modes are group together for
-    # visual comparison
-    for umi_type in ${umi_types[@]}; do
-        if [[ $umi_type == 'UMIs_not_removed' ]]; then
-            vis="visibility=hide"
-        else
-            vis="visibility=full"
-        fi
-        for align_mode in ${ALIGN_MODES[@]}; do
-            for strand in ${strands[@]}; do
+    webroot="~jhessel/projects/storici/results/common$DEBUG/$ASSEMBLY/$sample"
 
-                if [[ $umi_type == 'removed' ]]; then
-                    countsbw="$urlbase/$webpath/$sample.align.$align_mode.strand.$strand.counts.bw"
-                    name="name='$sample $strand $align_mode umi.removed'"
-                    description="description='sample=$sample strand=$strand \
-                                align.mode=$align_mode umi=removed'"
-                else
-                    countsbw="$urlbase/$webpath/$sample.$umi_type.align.$align_mode.strand.$strand.counts.bw"
-                    name="name='$sample $strand $align_mode umi.not.removed'"
-                    description="description='sample=$sample strand=$strand \
-                                align.mode=$align_mode umi=not removed'"
-                fi
+    bigwigdir="$webroot/bedgraphs"
+    bigbeddir="$webroot/peaks"
 
-                url="bigDataUrl=$countsbw"
-                trackbase="track type=bigWig"
-                trackline="$trackbase $url $name $description $color $vis $height"
+    for align_mode in ${ALIGN_MODES[@]}; do
+        for strand in ${strands[@]}; do
 
-                # print the line
-                echo $trackline >> $tracklinefile
+            track_color="color=$color"
 
-            done
+            #bigbed tracks
+            bigbed="$bigbeddir/$sample.$strand.align.$align_peaks.bb"
+            bigbed_name="name='$sample $strand $align_mode peaks"
+            bigbed_descrip="description='$descrip PEAKS sample=$sample \
+                            strand=$strand \
+                            align.mode=$align_mode '"
+
+            bigbed_track="track type=bigBed"
+            bigbed_url="bigDataUrl=$bigbed"
+            bigbed_vis="visibility=squish"
+            bigbed_trackline="$trackbase $bigbed_url $bigbed_name \
+                              $bigbed_descrip $track_color $bigbed_vis"
+
+            # print the line
+            echo $bigbed_trackline >> $tracklinefile
+
+            # bigWig tracks
+            bigwig="$bigwigdir/$sample.align.$align_mode.strand.$strand.counts.bw"
+            bigwig_name="name='$sample $strand $align_mode'"
+            bigwig_descrip="description='$descrip sample=$sample strand=$strand \
+                            align.mode=$align_mode'"
+            bigwig_height="maxHeightPixels=50:35:35"
+
+            bigwig_track="track type=bigWig"
+            bigwig_url="bigDataUrl=$bigwig"
+            bigwig_vis="visibility=full"
+            bigwig_trackline="$trackbase $url $name $description $color \
+                              $bigwig_vis $bigwig_height"
+
+            # print the line
+            echo $bigwig_trackline >> $tracklinefile
+
         done
     done
 done
