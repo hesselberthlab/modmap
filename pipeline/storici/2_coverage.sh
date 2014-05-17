@@ -3,7 +3,7 @@
 #BSUB -J coverage[1-10]
 #BSUB -e coverage.%J.%I.err
 #BSUB -o coverage.%J.%I.out
-#BSUB -q normal
+#BSUB -q short
 #BSUB -P storici
 
 <<DOC

@@ -3,6 +3,7 @@
 #BSUB -J tracklines
 #BSUB -o tracklines.%J.out
 #BSUB -e tracklines.%J.err
+#BSUB -q short
 
 <<DOC
 Generate tracklines for UCSC
