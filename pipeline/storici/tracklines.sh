@@ -18,6 +18,9 @@ strands=("both" "pos" "neg")
 umi_types=("removed" "UMIs_not_removed")
 
 tracklinefile=$RESULT/tracklines.txt
+if [[ ! -d $RESULT ]]; then
+    mkdir -p $RESULT
+fi
 
 # remove old file if exists b/c we're cat'ing
 if [[ -f $tracklinefile ]]; then
