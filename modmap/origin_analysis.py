@@ -79,50 +79,42 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
                              /<---5'    \
              left           /            \          right
     5' --------------------/              \--------------------- 3'
+
     3' --------------------\              /--------------------- 5'
                             \            /
                              \_____5'-->/
 
-    leading strand = -p $neg_right_bedgraph -n $pos_left_bedgraph
-    lagging strand = -p $neg_left_bedgraph -n $pos_right_bedgraph
+    Leading signals are the captured negative strand (i.e. pos
+    strand sequences) upstream (left) ofthe origin and captured 
+    positive strand (i.e. neg strand sequences) downstream
+    (right) of origin.
     '''
 
-    # args for nuc_frequencies()
+    # args for modmap.nuc_frequencies()
     kwargs = {'offset_min':-1,
               'offset_max':1,
               'region_size':1,
               'revcomp_strand':True,
               'min_counts':1,
-              'ignore_chroms':[],
-              'only_chroms':[],
               'verbose':verbose}
 
+    # keys are ori_strand, values are (sites, nuc_counts)
     result = defaultdict(dict)
 
-    # keys of the strand_args dict refer to the pos and neg signals
-    # for calc_nuc_counts()
-    # tuple values are the 
+    ori_strands = ('leading', 'lagging')
 
-    # XXX these are static to avoid ambiguous assigment later
-    strand_args = {}
-    strand_args['leading'] = {'pos':('neg','right'),
-                              'neg':('pos','left')}
-    strand_args['lagging'] = {'pos':('neg','left'),
-                              'neg':('pos','right')}
+    for ori_strand in ori_strands:
 
-    if verbose:
-        print >>sys.stderr, ">> calculating nuc frequencies ..."
-
-    for ori_strand in strand_args.keys():
-
-        # index 0 = strand; index 1 = side
-        pos_strand_arg = strand_args[ori_strand]['pos'][0]
-        neg_strand_arg = strand_args[ori_strand]['neg'][0]
-        pos_side_arg = strand_args[ori_strand]['pos'][1]
-        neg_side_arg = strand_args[ori_strand]['neg'][1]
-
-        pos_signal_bedtool = ori_signals[pos_strand_arg][pos_side_arg]
-        neg_signal_bedtool = ori_signals[neg_strand_arg][neg_side_arg]
+        if ori_strand == 'leading':
+            pos_signal_bedtool = ori_signals['pos']['left']
+            neg_signal_bedtool = ori_signals['neg']['right']        
+       
+        elif ori_strand == 'lagging':
+            pos_signal_bedtool = ori_signals['neg']['left']
+            neg_signal_bedtool = ori_signals['pos']['right']        
+        
+        if verbose:
+            print >>sys.stderr, ">> nuc.freq on %s strand ..." % ori_strand
 
         total_sites, nuc_counts = calc_nuc_counts(pos_signal_bedtool,
                                                   neg_signal_bedtool, 
@@ -156,6 +148,7 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
 
         if strand == 'pos':
             signal_bedtool = pos_signal_bedtool
+
         elif strand == 'neg':
             signal_bedtool = neg_signal_bedtool
 
