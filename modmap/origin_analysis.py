@@ -116,9 +116,9 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
         neg_signal_bedtool = ori_signals[neg_strand_arg][neg_side_arg]
 
         total_sites, nuc_counts = calc_nuc_counts(pos_signal_bedtool,
-                                 neg_signal_bedtool, 
-                                 fasta_filename,
-                                 **kwargs)
+                                                  neg_signal_bedtool, 
+                                                  fasta_filename,
+                                                  **kwargs)
 
         result[ori_strand] = (total_sites, nuc_counts)
 
@@ -171,16 +171,16 @@ def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
     # XXX hack to get a filehandle for looping. have to do this because
     # the groupby result is only 2 columns and doesn't appear to allow
     # iteration by the std BedTool iter() method
-    group_data = open(group_bedtool.TEMPFILES[-1])
+    with open(group_bedtool.TEMPFILES[-1]) as group_data:
 
-    select_origins = set() 
-    for row in group_data:
-        origin, timing = row.strip().split('\t')
-        timing = float(timing)
+        select_origins = set() 
+        for row in group_data:
+            origin, timing = row.strip().split('\t')
+            timing = float(timing)
 
-        if timing <= max_timing:
-            select_origins.add(origin)
-   
+            if timing <= max_timing:
+                select_origins.add(origin)
+       
     if verbose:
         print >>sys.stderr, ">> %d origins selected" % len(select_origins)
 
