@@ -68,6 +68,8 @@ origin.agg.count.ggplot <- function(df, sample.name, ...) {
     gp <- gp + geom_bar(stat='identity')
     gp <- gp + facet_grid(. ~ max.timing + flank.size)
     gp <- gp + theme_bw()
+    gp <- gp + scale_fill_brewer()
+
     # axis labels 
     gp <- gp + xlab('Direction')
     gp <- gp + ylab('Count')
@@ -75,6 +77,13 @@ origin.agg.count.ggplot <- function(df, sample.name, ...) {
     gp <- gp + theme(axis.text.x = element_text(angle = 90,
                                                 vjust = 0.5,
                                                 hjust = 1))
+    # add title
+    title.top = paste('modmap origin-analysis (aggregate counts)\n',
+                      'sample = ', sample.name, sep='')
+    title.bottom = "top row = max.timing; bottom row = flank.size"
+    title = paste(title.top, title.bottom, sep='\n')
+    gp <- gp + ggtitle(title)
+
     return(gp)
 }
 
