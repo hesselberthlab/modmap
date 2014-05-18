@@ -90,12 +90,14 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
     (right) of origin.
     '''
 
-    # args for modmap.nuc_frequencies()
+    # args for modmap.nuc_frequencies(). must be total of 8 args
     kwargs = {'offset_min':-1,
               'offset_max':1,
               'region_size':1,
               'revcomp_strand':True,
               'min_counts':1,
+              'ignore_chroms':[],
+              'only_chroms':[],
               'verbose':verbose}
 
     # keys are ori_strand, values are (sites, nuc_counts)
