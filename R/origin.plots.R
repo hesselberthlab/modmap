@@ -71,8 +71,8 @@ origin.agg.count.ggplot <- function(df, sample.name, ...) {
     gp <- gp + scale_fill_brewer()
 
     # axis labels 
-    gp <- gp + xlab('Direction')
-    gp <- gp + ylab('Count')
+    gp <- gp + xlab('Strand')
+    gp <- gp + ylab('Count of mapped positions in region')
     
     gp <- gp + theme(axis.text.x = element_text(angle = 90,
                                                 vjust = 0.5,
