@@ -66,7 +66,7 @@ ggplot.nuc.freq <- function(df, cur.size,
                                        y = freq))
         gp.freq <- gp.freq + geom_point(aes(x = offset, y = freq, 
                                         color = factor(nuc),size = 3))
-        # gp.freq <- gp.freq + scale_color_brewer(palette="Set1")
+        gp.freq <- gp.freq + scale_color_brewer(palette="Set1")
     }
 
     gp.freq <- gp.freq + theme_bw()

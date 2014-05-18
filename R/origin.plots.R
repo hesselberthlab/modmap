@@ -49,8 +49,7 @@ origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 
     # add title
     title.top = paste('modmap origin-analysis (per-nuc counts)\n',
-                      '(sample = ', sample.name, 
-                      ')', sep='')
+                      'sample = ', sample.name, sep='')
     title.bottom = "top row = max.timing; bottom row = flank.size"
     title = paste(title.top, title.bottom, sep='\n')
     gp <- gp + ggtitle(title)
