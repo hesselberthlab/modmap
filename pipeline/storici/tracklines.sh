@@ -54,7 +54,7 @@ for sample_idx in ${!SAMPLES[@]}; do
 
             #bigbed tracks
             bigbed="$bigbeddir/${sample}.${strand}.align.${align_mode}_peaks.bb"
-            bigbed_name="name='${sample} ${strand} ${align_mode} peaks"
+            bigbed_name="name='${sample} ${strand} ${align_mode} peaks'"
             bigbed_descrip="description='$descrip PEAKS sample=$sample \
                             strand=$strand \
                             align.mode=$align_mode '"
