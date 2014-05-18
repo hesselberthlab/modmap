@@ -74,6 +74,14 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
                            neg_signal_bedtool, fasta_filename, verbose):
 
     ''' calculate nucleotide frequencies within origins.
+                
+                              __________                 
+                             /<---5'    \
+             left           /            \          right
+    5' --------------------/              \--------------------- 3'
+    3' --------------------\              /--------------------- 5'
+                            \            /
+                             \_____5'-->/
 
     leading strand = -p $neg_right_bedgraph -n $pos_left_bedgraph
     lagging strand = -p $neg_left_bedgraph -n $pos_right_bedgraph
@@ -91,8 +99,9 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
 
     result = defaultdict(dict)
 
-    # keys of the dicts refer to the pos and neg signals
+    # keys of the strand_args dict refer to the pos and neg signals
     # for calc_nuc_counts()
+    # tuple values are the 
 
     # XXX these are static to avoid ambiguous assigment later
     strand_args = {}
@@ -129,27 +138,36 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
                         flank_size, verbose):
 
     ''' calcualte signals within flanks up and downstream of selected
-    origins '''
+    origins.
+    
+    result is a dict where keys are strands, values are dicts where keys
+    are sides and values are bedtools containg intercted bedGraph data,
+    e.g.:
+        
+        result[pos][left] = bedtool
 
-    # left = upstream; right = downstream
-    flanks = {}
-    flanks['left'] = origin_bedtool.flank(l=flank_size, r=0,
-                                            g=chrom_sizes_filename)
-    flanks['right'] = origin_bedtool.flank(l=0, r=flank_size,
-                                            g=chrom_sizes_filename)
-
-    # get positive and negative signals within flanks
-    signals = {}
-    signals['pos'] = pos_signal_bedtool
-    signals['neg' ]= neg_signal_bedtool
+    `pos` and `neg` refer to the raw coverage data, must be reverse comped
+    later
+    '''
 
     result = defaultdict(dict)
 
     for strand in STRANDS:
+
+        if strand == 'pos':
+            signal_bedtool = pos_signal_bedtool
+        elif strand == 'neg':
+            signal_bedtool = neg_signal_bedtool
+
         for side in SIDES:
 
-            signal_bedtool = signals[strand]
-            flank_bedtool = flanks[side]
+            # left = upstream; right = downstream
+            if side == 'left':
+                flank_bedtool = origin_bedtool.flank(l=flank_size, r=0,
+                                                     g=chrom_sizes_filename)
+            elif side == 'right':
+                flank_bedtool = origin_bedtool.flank(l=0, r=flank_size,
+                                                     g=chrom_sizes_filename)
 
             result[strand][side] = signal_bedtool.intersect(flank_bedtool)
 
