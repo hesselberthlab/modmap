@@ -25,8 +25,7 @@ def load_coverage(bam_filename, strand, verbose):
     elif strand == 'neg':
         kwargs['strand'] = '-'
 
-    bt = BedTool(bam_filename).genome_coverage(**kwargs)
+    bedtoolt = BedTool(bam_filename).genome_coverage(**kwargs)
 
-    return bt
-
+    return bedtoolt
 
