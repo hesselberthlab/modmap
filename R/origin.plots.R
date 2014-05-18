@@ -58,27 +58,35 @@ origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 }
 
 origin.agg.count.ggplot <- function(df, sample.name, ...) {
-  
-    gp <- ggplot(data = df,
-                 aes(nuc, freq, offset, direction))
+
+    # only need offset 0
+    data <- subset(df, offset == 0)
+
+    gp <- ggplot(data = data,
+                 aes(y=count, x=strand))
 
     gp <- gp + geom_bar(stat='identity')
-
+    gp <- gp + facet_grid(. ~ max.timing + flank.size)
     gp <- gp + theme_bw()
     # axis labels 
     gp <- gp + xlab('Direction')
     gp <- gp + ylab('Count')
-
+    
+    gp <- gp + theme(axis.text.x = element_text(angle = 90,
+                                                vjust = 0.5,
+                                                hjust = 1))
     return(gp)
 }
 
 # gp.origin.freq <- origin.freq.ggplot(df, sample.name)
 gp.origin.count <- origin.nuc.count.ggplot(df, sample.name)
+gp.origin.agg <- origin.agg.count.ggplot(df, sample.name)
 
 # write the files
-#freq.pdf.filename <- paste(output.dir, '/', 'modmap.origin.freq',
-#                      '.', sample.name, '.pdf', sep='')
-#ggsave(filename = freq.pdf.filename, plot = gp.nuc.freq, device = CairoPDF)
+agg.pdf.filename <- paste(output.dir, '/', 'modmap.origin.agg',
+                      '.', sample.name, '.pdf', sep='')
+ggsave(filename = agg.pdf.filename, plot = gp.origin.agg, 
+       height = 8.5, width = 11, device = CairoPDF)
 
 count.pdf.filename <- paste(output.dir, '/', 'modmap.origin.counts',
                            '.', sample.name, '.pdf', sep='')
