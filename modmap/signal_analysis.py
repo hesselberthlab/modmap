@@ -6,7 +6,6 @@
 import sys
 import pdb
 
-from operator import itemgetter
 from itertools import izip
 from collections import defaultdict
 
@@ -34,14 +33,21 @@ def signal_analysis(bam_filename, region_bed_filename, chrom_sizes_filename,
                            signal_operation,
                            signal_colnum,
                            verbose)
-                                   
+
+    header_fields = ('#region.name','region.score','region.strand',
+                     'signal.pos','signal.neg')
+    print '\t'.join(header_feilds)
+
+    for fields in signals:
+        region_name, region_score, region_strand, signal_pos, signal_neg = fields
+        print '\t'.join(map(str, fields))
+
 def calc_signals(region_bed_filename, pos_signal_bedtool,
                  neg_signal_bedtool, signal_operation, signal_colnum,
                  verbose):
-    ''' calculate signals from BED regions mapped onto positive and
-    negative strand data.'''
 
-    result = defaultdict(dict)
+    ''' generator to calculate signals from BED regions mapped onto positive and
+    negative strand data.'''
 
     region_bedtool = BedTool(region_bed_filename)
 
@@ -56,15 +62,15 @@ def calc_signals(region_bed_filename, pos_signal_bedtool,
 
     for region_row, signal_pos_row, signal_neg_row in zipped:
 
+        # XXX: need less ugly accessor, maybe using BED and bedGraph specs
         region_name = region_row[3]
         region_score = region_row[4]
+        region_strand = region_row[5]
 
         signal_pos = signal_pos_row[6]
         signal_neg = signal_neg_row[6]
 
-        pdb.set_trace()
-
-    return result
+        yield (region_name, region_score, region_strand, signal_pos, signal_neg)
 
 def _map_signals(region_bedtool, signal_bedtool, operation, signal_colnum):
     ''' aux function to improve readability '''
