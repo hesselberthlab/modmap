@@ -6,6 +6,9 @@
 import sys
 from pybedtools import BedTool
 
+# constants
+STRANDS = ('pos','neg')
+
 def load_coverage(bam_filename, strand, verbose):
     ''' load coverage from bam_filename.
 
@@ -25,7 +28,7 @@ def load_coverage(bam_filename, strand, verbose):
     elif strand == 'neg':
         kwargs['strand'] = '-'
 
-    bedtoolt = BedTool(bam_filename).genome_coverage(**kwargs)
+    bedtool = BedTool(bam_filename).genome_coverage(**kwargs)
 
-    return bedtoolt
+    return bedtool
 

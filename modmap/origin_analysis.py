@@ -11,15 +11,12 @@ from collections import defaultdict
 
 from pybedtools import BedTool
 
-from .common import load_coverage
+from .common import load_coverage, STRANDS
 from .nuc_frequencies import calc_nuc_counts
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
-
-SIDES = ('left','right')
-STRANDS = ('pos','neg')
 
 def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
                     fasta_filename, chrom_sizes_filename,
@@ -146,6 +143,8 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
 
     result = defaultdict(dict)
 
+    origin_sides = ('left','right')
+
     for strand in STRANDS:
 
         if strand == 'pos':
@@ -154,7 +153,7 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
         elif strand == 'neg':
             signal_bedtool = neg_signal_bedtool
 
-        for side in SIDES:
+        for side in origin_sides:
 
             # left = upstream; right = downstream
             if side == 'left':
