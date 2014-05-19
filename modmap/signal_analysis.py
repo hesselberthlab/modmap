@@ -7,7 +7,7 @@ import sys
 import pdb
 
 from operator import itemgetter
-from itertool import izip
+from itertools import izip
 from collections import defaultdict
 
 from pybedtools import BedTool
@@ -18,48 +18,59 @@ __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
-def expression_analysis(bam_filename, region_bed_filename,
-                        chrom_sizes_filename,
-                        pos_strand_label, neg_strand_label,
-                        verbose):
+def signal_analysis(bam_filename, region_bed_filename, chrom_sizes_filename,
+                    pos_strand_label, neg_strand_label, signal_colnum,
+                    signal_operation, verbose):
 
     pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
                                        verbose=verbose) 
     neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
                                        verbose=verbose) 
 
-    # XXX: make this a var
-    operation = 'sum'
     # region_bed_filename has FPKM as score
     signals = calc_signals(region_bed_filename,
                            pos_signal_bedtool,
                            neg_signal_bedtool,
-                           operation,
+                           signal_operation,
+                           signal_colnum,
                            verbose)
                                    
 def calc_signals(region_bed_filename, pos_signal_bedtool,
-                 neg_signal_bedtool, operation, verbose):
-    ''' DOC '''
-    result = defaultdict(dict)
+                 neg_signal_bedtool, signal_operation, signal_colnum,
+                 verbose):
+    ''' calculate signals from BED regions mapped onto positive and
+    negative strand data.'''
 
-    # signal is bedGraph format
-    signal_colnum = 4
+    result = defaultdict(dict)
 
     region_bedtool = BedTool(region_bed_filename)
 
     # strand flags are irrelevant, treating pos and neg as separate files
-    signal_pos_bedtool = region_bedtool.map(pos_signal_bedtool,
-                                            o=operation, c=signal_colnum)
+    signal_pos_bedtool = _map_signals(region_bedtool, pos_signal_bedtool,
+                                      signal_operation, signal_colnum)
 
-    signal_neg_bedtool = region_bedtool.map(neg_signal_bedtool,
-                                            o=operation, c=signal_colnum)
+    signal_neg_bedtool = _map_signals(region_bedtool, neg_signal_bedtool,
+                                      signal_operation, signal_colnum)
 
     zipped = izip(region_bedtool, signal_pos_bedtool, signal_neg_bedtool)
 
-    for row in zipped:
+    for region_row, signal_pos_row, signal_neg_row in zipped:
+
+        region_name = region_row[3]
+        region_score = region_row[4]
+
+        signal_pos = signal_pos_row[6]
+        signal_neg = signal_neg_row[6]
+
         pdb.set_trace()
 
     return result
+
+def _map_signals(region_bedtool, signal_bedtool, operation, signal_colnum):
+    ''' aux function to improve readability '''
+    map_bedtool = region_bedtool.map(signal_bedtool, o=operation,
+                                     c=signal_colnum, null=0)
+    return map_bedtool
 
 def print_report(signal_result, verbose):
     ''' DOC '''
@@ -77,6 +88,12 @@ def parse_options(args):
                           description=description)
 
     group = OptionGroup(parser, "Variables")
+
+    group.add_option("--signal-colnum", action="store", type='int',
+        default=4, help="column num for signal (default: %default)")
+
+    group.add_option("--signal-operation", action="store", type='str',
+        default='sum', help="operation for bedtool map (default: %default)")
 
     group.add_option("--pos-strand-label", action="store", type='str',
         default='pos', help="alternate pos strand label (default: %default)")
@@ -101,6 +118,8 @@ def main(args=sys.argv[1:]):
 
     kwargs = {'pos_strand_label':options.pos_strand_label,
               'neg_strand_label':options.neg_strand_label,
+              'signal_colnum':options.signal_colnum,
+              'signal_operation':options.signal_operation,
               'verbose':options.verbose}
 
     bam_filename = args[0]
