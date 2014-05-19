@@ -17,70 +17,60 @@ __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
-def signal_analysis(bam_filename, region_bed_filename, chrom_sizes_filename,
-                    pos_strand_label, neg_strand_label, signal_colnum,
-                    signal_operation, verbose):
-
-    pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
-                                       verbose=verbose) 
-    neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
-                                       verbose=verbose) 
+def signal_analysis(bam_filename, region_bed_filename,
+                    chrom_sizes_filename,
+                    pos_strand_label, neg_strand_label,
+                    signal_colnum, verbose):
 
     # region_bed_filename has FPKM as score
-    signals = calc_signals(region_bed_filename,
-                           pos_signal_bedtool,
-                           neg_signal_bedtool,
-                           signal_operation,
+    signals = calc_signals(bam_filename,
+                           region_bed_filename,
                            signal_colnum,
                            verbose)
 
     header_fields = ('#region.name','region.score','region.strand',
-                     'signal.pos','signal.neg')
-    print '\t'.join(header_feilds)
+                     'signal.strand','operation','signal')
+    print '\t'.join(header_fields)
 
     for fields in signals:
-        region_name, region_score, region_strand, signal_pos, signal_neg = fields
         print '\t'.join(map(str, fields))
 
-def calc_signals(region_bed_filename, pos_signal_bedtool,
-                 neg_signal_bedtool, signal_operation, signal_colnum,
-                 verbose):
+def calc_signals(bam_filename, region_bed_filename, signal_colnum, verbose):
 
     ''' generator to calculate signals from BED regions mapped onto positive and
     negative strand data.'''
 
     region_bedtool = BedTool(region_bed_filename)
 
-    # strand flags are irrelevant, treating pos and neg as separate files
-    signal_pos_bedtool = _map_signals(region_bedtool, pos_signal_bedtool,
-                                      signal_operation, signal_colnum)
+    # bedtools.map operations
+    operations = ('sum','count')
 
-    signal_neg_bedtool = _map_signals(region_bedtool, neg_signal_bedtool,
-                                      signal_operation, signal_colnum)
+    for signal_strand in STRANDS:
 
-    zipped = izip(region_bedtool, signal_pos_bedtool, signal_neg_bedtool)
+        signal_bedtool = load_coverage(bam_filename, strand=signal_strand,
+                                       verbose=verbose)
+        for oper in operations:
 
-    for region_row, signal_pos_row, signal_neg_row in zipped:
+            map_bedtool = region_bedtool.map(signal_bedtool, o=oper,
+                                             c=signal_colnum, null=0)
 
-        # XXX: need less ugly accessor, maybe using BED and bedGraph specs
-        region_name = region_row[3]
-        region_score = region_row[4]
-        region_strand = region_row[5]
+            for region_row, signal_row in izip(region_bedtool, map_bedtool):
 
-        signal_pos = signal_pos_row[6]
-        signal_neg = signal_neg_row[6]
+                region_name = region_row[3]
+                region_score = region_row[4]
 
-        yield (region_name, region_score, region_strand, signal_pos, signal_neg)
+                region_strand = region_row[5]
+                if region_strand == '+':
+                    region_strand = 'pos'
+                else:
+                    region_strand = 'neg'
 
-def _map_signals(region_bedtool, signal_bedtool, operation, signal_colnum):
-    ''' aux function to improve readability '''
-    map_bedtool = region_bedtool.map(signal_bedtool, o=operation,
-                                     c=signal_colnum, null=0)
-    return map_bedtool
+                signal = signal_row[6]
 
-def print_report(signal_result, verbose):
-    ''' DOC '''
-    pass
+                result = (region_name, region_score, region_strand,
+                          signal_strand, oper, signal)
+
+                yield result
 
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
@@ -95,11 +85,8 @@ def parse_options(args):
 
     group = OptionGroup(parser, "Variables")
 
-    group.add_option("--signal-colnum", action="store", type='int',
+    group.add_option("--signal-colnum", action="store", type='str',
         default=4, help="column num for signal (default: %default)")
-
-    group.add_option("--signal-operation", action="store", type='str',
-        default='sum', help="operation for bedtool map (default: %default)")
 
     group.add_option("--pos-strand-label", action="store", type='str',
         default='pos', help="alternate pos strand label (default: %default)")
@@ -125,7 +112,6 @@ def main(args=sys.argv[1:]):
     kwargs = {'pos_strand_label':options.pos_strand_label,
               'neg_strand_label':options.neg_strand_label,
               'signal_colnum':options.signal_colnum,
-              'signal_operation':options.signal_operation,
               'verbose':options.verbose}
 
     bam_filename = args[0]
