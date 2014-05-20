@@ -61,7 +61,7 @@ for assembly in ${ASSEMBLIES[@]}; do
     bsub -J "plots_$ASSEMBLY$job_array" \
         -w "done('origin_anal_$ASSEMBLY[*]') && \
             done('nuc_freqs_$ASSEMBLY[*]') && \
-            done('exp_freqs_$ASSEMBLY[*]')" \
+            done('exp_anal_$ASSEMBLY[*]')" \
         < $PIPELINE/5_plots.sh
 
     bsub -J "tracklines_$ASSEMBLY" \
