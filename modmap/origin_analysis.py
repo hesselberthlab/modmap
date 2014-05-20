@@ -18,6 +18,8 @@ __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
+# Copyright 2013,2014 Jay R. Hesselberth
+
 def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
                     fasta_filename, chrom_sizes_filename,
                     max_timing, flank_size, verbose):
@@ -102,15 +104,17 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
 
     ori_strands = ('leading', 'lagging')
 
+    # XXX refer to drawing on board for these updated settings
+    # `leading` and `lagging` represent the **template** strand
     for ori_strand in ori_strands:
 
-        if ori_strand == 'leading':
+        if ori_strand == 'lagging':
+            pos_signal_bedtool = ori_signals['pos']['right']
+            neg_signal_bedtool = ori_signals['neg']['left']        
+       
+        elif ori_strand == 'leading':
             pos_signal_bedtool = ori_signals['pos']['left']
             neg_signal_bedtool = ori_signals['neg']['right']        
-       
-        elif ori_strand == 'lagging':
-            pos_signal_bedtool = ori_signals['neg']['left']
-            neg_signal_bedtool = ori_signals['pos']['right']        
         
         if verbose:
             print >>sys.stderr, ">> nuc.freq on %s strand ..." % ori_strand
