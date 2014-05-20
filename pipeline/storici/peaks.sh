@@ -51,9 +51,20 @@ for strand in ${strands[@]}; do
             --extsize 5 \
             --gsize $genomesize \
             --call-summits
+
+        # sometimes the score exceeds the maximum (1000) defined by the
+        # narrowPeak spec. Reformat the narrowPeak file to covert >= 1000
+        # to 1000
+        narrowpeak_tmpfile="$narrowpeak.tmp"
+        awk 'BEGIN {OFS="\t"} \
+                   { if ($5 > 1000) $5 = 1000; print $0}' \
+            < $narrowpeak \
+            > $narrowpeak_tmpfile
+        mv $narrowpeak_tmpfile $narrowpeak
         
         bedToBigBed -type=bed6+4 -as=$asfile \
             $narrowpeak $CHROM_SIZES $bigbed
 
     done
 done
+
