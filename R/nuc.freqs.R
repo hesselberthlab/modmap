@@ -12,14 +12,13 @@ library(Cairo)
 
 # get the filename
 output = commandArgs(trailingOnly=TRUE)
-if (length(output) != 4) {
+if (length(output) != 3) {
    stop("usage: Rscript nuc.freq.R infile sample.name output.dir")
 }
 
 infile = output[1]
 sample.name = output[2]
-plot.type = output[3]
-output.dir = output[4]
+output.dir = output[3]
 
 COLNAMES <- c('nuc','offset','region.size','count',
               'freq','total.sites')
