@@ -12,7 +12,13 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
+# XXX testing
+# CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
 source $CONFIG
+#ASSEMBLY=sacCer2
+#RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
+#CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
+
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 # output directory
@@ -22,9 +28,9 @@ if [[ ! -d $results ]]; then
 fi
 
 # origins and timing
-region_types=('mrna' 'promoter')
+region_types=('mrna' 'promoters')
 region_filenames=("$DATA/$ASSEMBLY/exp.fpkm.bed"
-                  "$DATA/$ASSEMBLY/promoter.250bp.fpkm.bed")
+                  "$DATA/$ASSEMBLY/promoters.250bp.fpkm.bed")
 
 # XXX need to run module out of bin directory
 cd $BIN
@@ -34,7 +40,7 @@ aligndir=$RESULT/$sample/alignment
 for align_mode in ${ALIGN_MODES[@]}; do
     BAM=$aligndir/$sample.align.$align_mode.bam
 
-    for region_idx in ${!region_types}; do
+    for region_idx in ${!region_types[@]}; do
 
         region_type=${region_types[$region_idx]}
         region_filename=${region_filenames[$region_idx]}
