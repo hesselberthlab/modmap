@@ -40,7 +40,9 @@ exp.corr.plot <- function(df, sample.name, ... ) {
                      y=log2(signal)))
 
     gp <- gp + geom_point()
-    gp <- gp + facet_grid(operation ~ region.strand + signal.strand)
+    gp <- gp + geom_smooth(method = "lm") 
+    gp <- gp + facet_grid(operation ~ region.strand + signal.strand,
+                          margins = TRUE)
     gp <- gp + theme(legend.position = 'none')
     # gp <- gp + scale_fill_brewer(palette="Set1")
 
