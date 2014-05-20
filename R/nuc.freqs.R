@@ -13,24 +13,13 @@ library(Cairo)
 # get the filename
 output = commandArgs(trailingOnly=TRUE)
 if (length(output) != 4) {
-   stop("usage: Rscript nuc.freq.R infile sample.name plot.type output.dir")
+   stop("usage: Rscript nuc.freq.R infile sample.name output.dir")
 }
 
 infile = output[1]
 sample.name = output[2]
 plot.type = output[3]
 output.dir = output[4]
-
-# set up the plot type
-if (plot.type == 'hist') {
-    hist=TRUE
-    scatter=FALSE
-} else if (plot.type == 'scatter') {
-    hist = FALSE
-    scatter = TRUE
-} else {
-    stop("plot type is either 'hist' or 'scatter'")
-}
 
 COLNAMES <- c('nuc','offset','region.size','count','freq','total.sites')
 df <- read.table(infile, col.names=COLNAMES)
@@ -41,48 +30,43 @@ if (nrow(df) == 0) {
 }
 head(df)
 
-ggplot.nuc.freq <- function(df, cur.size,
-    hist = hist, 
-    scatter = scatter, ... ) {
+# color interpolation to expand palette
+# http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
+getPalette = colorRampPalette(brewer.pal(9, "Set1"))
+
+ggplot.nuc.freq <- function(df, cur.size, ... ) {
 
     # subset the data
-    df.subset <- subset(df, region.size == cur.size)
+    df <- subset(df, region.size == cur.size)
 
     # total.sites should all be the same, just take the first
-    num.sites <- df.subset$total.sites[1]
+    num.sites <- df$total.sites[1]
 
-    sum.counts <- sum(df.subset$count)
+    sum.counts <- sum(df$count)
+   
+    num.colors <- length(unique(df$nuc))
 
-    gp.freq <- ggplot(data = df.subset,
+    gp.freq <- ggplot(data = df,
                      aes(nuc, freq, offset))
 
-    if (hist) {
-        gp.freq <- gp.freq + geom_bar(stat = 'identity', aes(fill = factor(nuc)))
-        gp.freq <- gp.freq + facet_grid(. ~ offset)
-        gp.freq <- gp.freq + theme(legend.position = 'none')
-    }
-    else if (scatter) {
-        gp.freq <- gp.freq + geom_line(aes(color=factor(nuc), x = offset,
-                                       y = freq))
-        gp.freq <- gp.freq + geom_point(aes(x = offset, y = freq, 
-                                        color = factor(nuc),size = 3))
+    gp.freq <- gp.freq + geom_line(aes(color=factor(nuc), x = offset,
+                                   y = freq))
+
+    gp.freq <- gp.freq + geom_point(aes(x = offset, y = freq, 
+                                        color = nuc, size = 3))
+  
+    if (num.colors > 4) {
+        gp.freq <- gp.freq + scale_color_manual(values = getPalette(num.colors))
+    } else {
         gp.freq <- gp.freq + scale_color_brewer(palette="Set1")
     }
 
     gp.freq <- gp.freq + theme_bw()
-
-    # adjust x labels if number of labels is too high
-    if (length(unique(df.subset$nuc)) > 4) {
-        gp.freq <- gp.freq + 
-                   theme(axis.text.x = element_text(angle=90, size=6))
-    }
+    gp.freq <- gp.freq + theme(legend.position = 'bottom')
+    gp.freq <- gp.freq + guides(fill = guide_legend(nrow = 3))
 
     # axis labels 
-    if (hist) {
-        gp.freq <- gp.freq + xlab('Nucleotides')
-    } else if (scatter) {
-        gp.freq <- gp.freq + xlab('Position')
-    }    
+    gp.freq <- gp.freq + xlab('Position')
     gp.freq <- gp.freq + ylab('Frequency')
 
     # add title
@@ -103,14 +87,12 @@ for (idx in 1:length(uniq.sizes)) {
 
     cur.size <- uniq.sizes[idx]
 
-    gp.nuc.freq <- ggplot.nuc.freq(df, cur.size, hist=hist,
-                                   scatter=scatter)
+    gp.nuc.freq <- ggplot.nuc.freq(df, cur.size)
 
     # write the file
     pdf.filename <- paste(output.dir, '/', 'modmap.nuc.freq.region.',
                           cur.size, '.', sample.name, '.pdf', sep='')
 
-    ggsave(filename = pdf.filename, 
-           plot = gp.nuc.freq,
+    ggsave(filename = pdf.filename, plot = gp.nuc.freq,
            device = CairoPDF)
 }
