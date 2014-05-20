@@ -42,6 +42,19 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
     sampleid="$sample.align-$align_mode"
     Rscript $RSCRIPTS/origin.plots.R $counts "$sampleid" $subplotdir
 
+    # --- expression plots --------------------------------------
+    subplotdir="$plotdir/expression_analysis"
+    if [[ ! -d $subplotdir ]]; then
+        mkdir -p $subplotdir
+    fi
+
+    region_types=('mrna' 'promoters')
+    for region_type in ${region_types[@]}; do
+        counts="$results/expression_analysis/exp_analysis.$region_type.align.$align_mode.tab"
+        sampleid="$sample align=$align_mode region=$region_type"
+        Rscript $RSCRIPTS/exp.plots.R $counts "$sampleid" $subplotdir
+    done
+
     for ig_idx in ${!ignore_modes[@]}; do
 
         ignore_mode=${ignore_modes[$ig_idx]}
