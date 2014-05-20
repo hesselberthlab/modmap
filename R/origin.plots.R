@@ -33,6 +33,9 @@ head(df)
 
 origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 
+    # want offsets between -1 and 1
+    df <- subset(df, offset >= -1 & offset <= 1)
+
     gp <- ggplot(data = df, 
                  aes(x=offset, y=count, fill=nuc))
 
@@ -49,6 +52,37 @@ origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 
     # add title
     title.top = paste('modmap origin-analysis (per-nuc counts)\n',
+                      'sample = ', sample.name, sep='')
+    title.bottom = "top row = max.timing; bottom row = flank.size"
+    title = paste(title.top, title.bottom, sep='\n')
+    gp <- gp + ggtitle(title)
+
+    return(gp)
+}
+
+origin.nuc.freq.zoom.ggplot <- function(df, sample.name, ... ) {
+
+    # want offsets between -1 and 1
+    df <- subset(df, flank.size >= 5000 & max.timing >= 30)
+
+    gp <- ggplot(data = df, 
+                 aes(x=offset, y=freq, color=nuc))
+
+    gp <- gp + geom_line()
+    gp <- gp + geom_point(aes(size=3))
+
+    gp <- gp + facet_grid(strand ~ max.timing + flank.size)
+    gp <- gp + theme(legend.position = 'none')
+    gp <- gp + scale_color_brewer(palette="Set1")
+
+    gp <- gp + theme_bw()
+
+    # axis labels 
+    gp <- gp + xlab('Offset')
+    gp <- gp + ylab('Nucleotide frequency')
+
+    # add title
+    title.top = paste('modmap nucleotide frequency\n',
                       'sample = ', sample.name, sep='')
     title.bottom = "top row = max.timing; bottom row = flank.size"
     title = paste(title.top, title.bottom, sep='\n')
@@ -90,6 +124,7 @@ origin.agg.count.ggplot <- function(df, sample.name, ...) {
 # gp.origin.freq <- origin.freq.ggplot(df, sample.name)
 gp.origin.count <- origin.nuc.count.ggplot(df, sample.name)
 gp.origin.agg <- origin.agg.count.ggplot(df, sample.name)
+gp.origin.zoom <- origin.nuc.freq.zoom.ggplot(df, sample.name)
 
 # write the files
 agg.pdf.filename <- paste(output.dir, '/', 'modmap.origin.agg',
@@ -102,3 +137,7 @@ count.pdf.filename <- paste(output.dir, '/', 'modmap.origin.counts',
 ggsave(filename = count.pdf.filename, plot = gp.origin.count,
        height = 8.5, width = 11, device = CairoPDF)
 
+zoom.pdf.filename <- paste(output.dir, '/', 'modmap.origin.zoom',
+                           '.', sample.name, '.pdf', sep='')
+ggsave(filename = zoom.pdf.filename, plot = gp.origin.zoom,
+       height = 8.5, width = 11, device = CairoPDF)
