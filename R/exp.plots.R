@@ -1,10 +1,11 @@
-# origin.plots.R
+# exp.plots.R 
 #
 # __author__ = 'Jay Hesselberth'
 # __contact__ = 'jay.hesselberth@gmail.com'
 # __version__ = '$Revision: 552 $'
 #
-# modmap pipeline for plotting signals relative to origins
+# modmap pipeline for plotting signals relative to
+# expression levels
 
 library(ggplot2)
 library(Cairo)
@@ -13,7 +14,7 @@ library(gridExtra)
 # get the filename
 output = commandArgs(trailingOnly=TRUE)
 if (length(output) != 3) {
-   stop("usage: Rscript origin.plots.R infile sample.name output.dir")
+   stop("usage: Rscript exp.plots.R infile sample.name output.dir")
 }
 
 infile = output[1]
@@ -62,7 +63,6 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     return(gp)
 }
 
-# gp.origin.freq <- origin.freq.ggplot(df, sample.name)
 gp.exp.plot <- exp.corr.plot(df, sample.name)
 
 # write the files
