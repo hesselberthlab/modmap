@@ -55,17 +55,22 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
                              x = offset, y = freq))
 
     gp <- gp + geom_point(aes(x = offset, y = freq, 
-                              color = nuc, size = 3))
+                              color = nuc, size = 3),
+                          show_guide = FALSE)
   
-    if (num.colors > 4) {
-        gp <- gp + scale_color_manual(values = getPalette(num.colors))
-    } else {
-        gp <- gp + scale_color_brewer(palette="Set1")
-    }
-
     gp <- gp + theme_bw()
     gp <- gp + theme(legend.position = 'bottom')
-    gp <- gp + guides(fill = guide_legend(nrow = 3))
+
+    if (num.colors > 4) {
+        gp <- gp + scale_color_manual(values = getPalette(num.colors))
+        gp <- gp + guides(color = guide_legend(title = NULL,
+                                               nrow = 4))
+    } else {
+        gp <- gp + scale_color_brewer(palette="Set1")
+        gp <- gp + guides(color = guide_legend(title = NULL,
+                                               nrow = 1))
+    }
+
 
     # axis labels 
     gp <- gp + xlab('Position')
@@ -96,5 +101,6 @@ for (idx in 1:length(uniq.sizes)) {
                           cur.size, '.', sample.name, '.pdf', sep='')
 
     ggsave(filename = pdf.filename, plot = gp.nuc.freq,
+           height = 8.5, width = 11,
            device = CairoPDF)
 }
