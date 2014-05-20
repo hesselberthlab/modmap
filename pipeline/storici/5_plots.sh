@@ -60,7 +60,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         ignore_mode=${ignore_modes[$ig_idx]}
 
         # --- nuc_freq plots ------------------------------------
-        subplotdir="$plotdir/nuc_freqs/$plot_type"
+        subplotdir="$plotdir/nuc_freqs"
         if [[ ! -d $subplotdir ]]; then
             mkdir -p $subplotdir
         fi
