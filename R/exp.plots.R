@@ -50,7 +50,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
 
     gp <- gp + geom_text(data = corrs,
                          aes(label = paste("r=", cor, sep="")),
-                         x=2, y=5)
+                         x=9, y=4)
 
     gp <- gp + theme(legend.position = 'none')
     gp <- gp + theme_bw()
