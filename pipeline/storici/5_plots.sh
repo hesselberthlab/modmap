@@ -60,19 +60,14 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         ignore_mode=${ignore_modes[$ig_idx]}
 
         # --- nuc_freq plots ------------------------------------
-        plottypes=("scatter")
-        for plot_type in ${plottypes[@]}; do
+        subplotdir="$plotdir/nuc_freqs/$plot_type"
+        if [[ ! -d $subplotdir ]]; then
+            mkdir -p $subplotdir
+        fi
 
-            subplotdir="$plotdir/nuc_freqs/$plot_type"
-            if [[ ! -d $subplotdir ]]; then
-                mkdir -p $subplotdir
-            fi
-
-            counts="$results/nuc_freqs/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
-            sampleid="$sample.align-$align_mode.subset-$ignore_mode"
-            Rscript $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $plot_type $subplotdir
-
-        done
+        counts="$results/nuc_freqs/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
+        sampleid="$sample.align-$align_mode.subset-$ignore_mode"
+        Rscript $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $subplotdir
 
     done
 done
