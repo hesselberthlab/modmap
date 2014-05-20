@@ -36,34 +36,33 @@ for assembly in ${ASSEMBLIES[@]}; do
     # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
-    sleep 1
 
     bsub -J "peaks_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/peaks.sh
-    sleep 1
 
     # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
-    sleep 1
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/3_nuc_freqs.sh
-    sleep 1
 
     bsub -J "origin_anal_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/4_origin_analysis.sh
-    sleep 1
+
+    bsub -J "exp_anal_$ASSEMBLY$job_array" \
+        -w "done('align_$ASSEMBLY[*]')" \
+        < $PIPELINE/expression_analysis.sh
 
     bsub -J "plots_$ASSEMBLY$job_array" \
         -w "done('origin_anal_$ASSEMBLY[*]') && \
-            done('nuc_freqs_$ASSEMBLY[*]')" \
+            done('nuc_freqs_$ASSEMBLY[*]') && \
+            done('exp_freqs_$ASSEMBLY[*]')" \
         < $PIPELINE/5_plots.sh
-    sleep 1
 
     bsub -J "tracklines_$ASSEMBLY" \
         < $PIPELINE/tracklines.sh
