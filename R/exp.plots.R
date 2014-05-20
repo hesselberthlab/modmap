@@ -38,7 +38,7 @@ df <- subset(df, region.score > 1 & signal > 1)
 exp.corr.plot <- function(df, sample.name, ... ) {
 
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
-                   summarise, cor = round(cor(region.score, signal), 2))
+                   summarise, cor = round(cor(region.score, signal), 3))
 
     gp <- ggplot(data = df, 
                  aes(x=log2(region.score),
@@ -46,12 +46,11 @@ exp.corr.plot <- function(df, sample.name, ... ) {
 
     gp <- gp + geom_point()
     gp <- gp + geom_smooth(method = "lm") 
-    gp <- gp + facet_grid(operation ~ region.strand + signal.strand,
-                          margins = TRUE)
+    gp <- gp + facet_grid(operation ~ region.strand + signal.strand)
 
     gp <- gp + geom_text(data = corrs,
                          aes(label = paste("r=", cor, sep="")),
-                         x=30, y=4)
+                         x=2, y=5)
 
     gp <- gp + theme(legend.position = 'none')
     gp <- gp + theme_bw()
