@@ -51,7 +51,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
     region_types=('mrna' 'promoters')
     for region_type in ${region_types[@]}; do
         counts="$results/expression_analysis/exp_analysis.$region_type.align.$align_mode.tab"
-        sampleid="$sample align=$align_mode region=$region_type"
+        sampleid="$sample.align-$align_mode.region-$region_type"
         Rscript $RSCRIPTS/exp.plots.R $counts "$sampleid" $subplotdir
     done
 
