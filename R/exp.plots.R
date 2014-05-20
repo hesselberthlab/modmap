@@ -9,6 +9,7 @@
 
 library(ggplot2)
 library(Cairo)
+library(plyr)
 library(gridExtra)
 
 # get the filename
@@ -21,8 +22,8 @@ infile = output[1]
 sample.name = output[2]
 output.dir = output[3]
 
-COLNAMES <- ('region.name','region.score','region.strand',
-             'signal.strand','operation','signal')
+COLNAMES <- c('region.name', 'region.score', 'region.strand',
+             'signal.strand', 'operation', 'signal')
 
 df <- read.table(infile, col.names=COLNAMES)
 if (nrow(df) == 0) {
@@ -36,6 +37,9 @@ df <- subset(df, region.score > 1 & signal > 1)
 
 exp.corr.plot <- function(df, sample.name, ... ) {
 
+    corrs <- ddply(df, operation ~ region.strand + signal.strand,
+                   summarise, cor = round(cor(region.score, signal), 2))
+
     gp <- ggplot(data = df, 
                  aes(x=log2(region.score),
                      y=log2(signal)))
@@ -44,9 +48,12 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     gp <- gp + geom_smooth(method = "lm") 
     gp <- gp + facet_grid(operation ~ region.strand + signal.strand,
                           margins = TRUE)
-    gp <- gp + theme(legend.position = 'none')
-    # gp <- gp + scale_fill_brewer(palette="Set1")
 
+    gp <- gp + geom_text(data = corrs,
+                         aes(label = paste("r=", cor, sep="")),
+                         x=30, y=4)
+
+    gp <- gp + theme(legend.position = 'none')
     gp <- gp + theme_bw()
 
     # axis labels 
