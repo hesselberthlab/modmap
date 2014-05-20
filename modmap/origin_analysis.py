@@ -192,9 +192,14 @@ def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
 
             if timing <= max_timing:
                 select_origins.add(origin)
-       
+
     if verbose:
-        print >>sys.stderr, ">> %d origins selected" % len(select_origins)
+        print >>sys.stderr, ">> %d origins selected:" % len(select_origins)
+
+        # these are printed in the data table as comments
+        print "#origins selected"
+        for oriname in select_origins:
+            print "#%s" % oriname
 
     # now reconstruct a BedTool with selected origins
     select_intervals = []
