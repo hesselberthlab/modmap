@@ -21,7 +21,8 @@ sample.name = output[2]
 plot.type = output[3]
 output.dir = output[4]
 
-COLNAMES <- c('nuc','offset','region.size','count','freq','total.sites')
+COLNAMES <- c('nuc','offset','region.size','count',
+              'freq','total.sites')
 df <- read.table(infile, col.names=COLNAMES)
 
 if (nrow(df) == 0) {
@@ -43,31 +44,32 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
     num.sites <- df$total.sites[1]
 
     sum.counts <- sum(df$count)
-   
+  
+    # number of colors needed for the palette
     num.colors <- length(unique(df$nuc))
 
-    gp.freq <- ggplot(data = df,
+    gp <- ggplot(data = df,
                      aes(nuc, freq, offset))
 
-    gp.freq <- gp.freq + geom_line(aes(color=factor(nuc), x = offset,
-                                   y = freq))
+    gp <- gp + geom_line(aes(color=factor(nuc),
+                             x = offset, y = freq))
 
-    gp.freq <- gp.freq + geom_point(aes(x = offset, y = freq, 
-                                        color = nuc, size = 3))
+    gp <- gp + geom_point(aes(x = offset, y = freq, 
+                              color = nuc, size = 3))
   
     if (num.colors > 4) {
-        gp.freq <- gp.freq + scale_color_manual(values = getPalette(num.colors))
+        gp <- gp + scale_color_manual(values = getPalette(num.colors))
     } else {
-        gp.freq <- gp.freq + scale_color_brewer(palette="Set1")
+        gp <- gp + scale_color_brewer(palette="Set1")
     }
 
-    gp.freq <- gp.freq + theme_bw()
-    gp.freq <- gp.freq + theme(legend.position = 'bottom')
-    gp.freq <- gp.freq + guides(fill = guide_legend(nrow = 3))
+    gp <- gp + theme_bw()
+    gp <- gp + theme(legend.position = 'bottom')
+    gp <- gp + guides(fill = guide_legend(nrow = 3))
 
     # axis labels 
-    gp.freq <- gp.freq + xlab('Position')
-    gp.freq <- gp.freq + ylab('Frequency')
+    gp <- gp + xlab('Position')
+    gp <- gp + ylab('Frequency')
 
     # add title
     title.top = paste('modmap nucleotide-frequency\n(sample ',
@@ -76,9 +78,9 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
                          sum.counts, sep='')
 
     title = paste(title.top, title.bottom, sep='\n')
-    gp.freq <- gp.freq + ggtitle(title)
+    gp <- gp + ggtitle(title)
 
-    return(gp.freq)
+    return(gp)
 }
 
 uniq.sizes = unique(df$region.size)
