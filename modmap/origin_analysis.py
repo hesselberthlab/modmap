@@ -88,8 +88,8 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
     '''
 
     # args for modmap.nuc_frequencies(). must be total of 8 args
-    kwargs = {'offset_min':-1,
-              'offset_max':1,
+    kwargs = {'offset_min':-15,
+              'offset_max':15,
               'region_size':1,
               'revcomp_strand':True,
               'min_counts':1,
