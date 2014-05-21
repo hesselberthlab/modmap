@@ -32,11 +32,13 @@ if (nrow(df) == 0) {
 }
 head(df)
 
-# subset data
-df <- subset(df, region.score > 1 & signal > 1)
 
 exp.corr.plot <- function(df, sample.name, ... ) {
 
+    # subset data
+    df <- subset(df, region.score > 1 & signal > 1)
+
+    # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
                    summarise, cor = round(cor(region.score, signal), 3))
 
@@ -44,7 +46,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
                  aes(x=log2(region.score),
                      y=log2(signal)))
 
-    gp <- gp + geom_point()
+    gp <- gp + geom_point(show_guide = FALSE)
     gp <- gp + geom_smooth(method = "lm") 
     gp <- gp + facet_grid(operation ~ region.strand + signal.strand)
 
@@ -52,7 +54,6 @@ exp.corr.plot <- function(df, sample.name, ... ) {
                          aes(label = paste("r=", cor, sep="")),
                          x=9, y=4)
 
-    gp <- gp + theme(legend.position = 'none')
     gp <- gp + theme_bw()
 
     # axis labels 

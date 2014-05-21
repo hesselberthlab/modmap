@@ -41,8 +41,8 @@ origin.nuc.count.ggplot <- function(df, sample.name, ... ) {
 
     gp <- gp + geom_bar(stat='identity', position='dodge')
     gp <- gp + facet_grid(strand ~ max.timing + flank.size)
-    gp <- gp + theme(legend.position = 'none')
     gp <- gp + scale_fill_brewer(palette="Set1")
+    gp <- gp + guides(color = guide_legend(title = NULL))
 
     gp <- gp + theme_bw()
 
@@ -69,11 +69,11 @@ origin.nuc.freq.zoom.ggplot <- function(df, sample.name, ... ) {
                  aes(x=offset, y=freq, color=nuc))
 
     gp <- gp + geom_line()
-    gp <- gp + geom_point(aes(size=3))
+    gp <- gp + geom_point(aes(size=3), show_guide = FALSE)
 
     gp <- gp + facet_grid(strand ~ max.timing + flank.size)
-    gp <- gp + theme(legend.position = 'none')
     gp <- gp + scale_color_brewer(palette="Set1")
+    gp <- gp + guides(color = guide_legend(title = NULL))
 
     gp <- gp + theme_bw()
 
