@@ -1,6 +1,13 @@
 #! /usr/bin/env python
 
-''' modmap.origin_analysis: XXX
+''' modmap.origin_analysis: calcuclate nucleotide frequencies with repect
+to annotated origins:
+
+    1. select origins based on replication timing
+    2. select signals in leading and lagging strands near selected origins
+    within some flanking distance
+    3. calculate nucleotide frequences in those regions
+
 '''
 
 import sys

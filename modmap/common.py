@@ -17,7 +17,7 @@ def load_coverage(bam_filename, strand, verbose):
         '''
 
     if verbose:
-        print >>sys.stderr, ">> calc coverage for %s on %s strand" % \
+        print >>sys.stderr, ">> loading coverage for %s on %s strand" % \
                             (bam_filename, strand)
 
     # XXX calc 5' positions in bedGraph format
