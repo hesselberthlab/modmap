@@ -18,39 +18,41 @@ def genome_nuc_freqs(fasta_filename, region_size_min, region_size_max,
     header = ('#region.size','nuc','count','freq')
     print '\t'.join(header)
 
-    for region_size in range(region_size_min, region_size_max + 1):
-        nuc_counts = calc_nuc_counts(fasta_filename, region_size, verbose)
+    nuc_counts = calc_nuc_counts(fasta_filename, region_size_min,
+                                 region_size_max, verbose)
 
-        nuc_sum = float(sum(nuc_counts.values()))
+    for region_size in nuc_counts:
 
-        for nuc, count in sorted(nuc_counts.items()):
+        nuc_sum = float(sum(nuc_counts[region_size].values()))
+
+        for nuc, count in sorted(nuc_counts[region_size].items()):
             nuc_freq = count / nuc_sum
             print '%d\t%s\t%s\t%s' % (region_size, nuc, str(count), str(nuc_freq))
 
-def calc_nuc_counts(fasta_filename, region_size, verbose):
+def calc_nuc_counts(fasta_filename, region_size_min,
+                    region_size_max, verbose):
     ''' calculate nuc frequencies for normalization.
 
         Returns: dict of nucleotide frequencies.
     '''
 
-    if verbose:
-        print >>sys.stderr, ">> calc nuc freqs for region %d" % \
-            region_size
-
-    nuc_counts = Counter()
+    nuc_counts = defaultdict(Counter)
 
     fasta = Fasta(fasta_filename)
 
     for chrom, seq in fasta.items():
 
         for idx, pos in enumerate(seq):
-            nucs = seq[idx:idx+region_size]
+            for region_size in range(region_size_min,
+                                     region_size_max + 1):
 
-            if len(nucs) < region_size: continue
+                nucs = seq[idx:idx+region_size]
 
-            nuc_counts[nucs] += 1
+                if len(nucs) < region_size: continue
 
-    return nuc_freqs
+                nuc_counts[region_size][nucs] += 1
+
+    return nuc_counts
 
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
