@@ -24,7 +24,8 @@ __version__ = '0.1'
 def nuc_frequencies(bam_filename, fasta_filename, 
                     revcomp_strand, min_counts, 
                     offset_min, offset_max, region_size,
-                    ignore_chroms, only_chroms, verbose):
+                    ignore_chroms, only_chroms, norm_freqs,
+                    verbose):
 
     pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
                                        verbose=verbose) 
@@ -44,7 +45,7 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
                     offset_min, offset_max, region_size,
                     ignore_chroms, only_chroms, verbose):
 
-    ''' main routine for calculating nuc_counts) '''
+    ''' main routine for calculating nuc_counts '''
 
     if verbose:
         msg =  ">> analyzing sequences ...\n"
@@ -125,14 +126,16 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
 
     return total_sites, nuc_counts
 
-def print_report(nuc_counts, region_size, total_sites, verbose):
+def print_report(nuc_counts, region_size, total_sites, norm_freqs, verbose):
     ''' print report of nuc_counts with frequency calculations '''
 
-    if verbose:
-        debug_report(nuc_counts)
+    # calculate background frequencies for normatlization
+    fasta = Fasta(fastafilename)
+    bkgd_freqs = calc_nuc_freqs(fasta, region_size, verbose)
 
     # report the results
-    header = ('#nuc','offset','region.size','count','freq','total.sites') 
+    header = ('#nuc','offset','region.size','count',
+              'freq','norm.freq','total.sites') 
     print '\t'.join(header)
 
     for offset, counts in sorted(nuc_counts.items()):
@@ -140,30 +143,42 @@ def print_report(nuc_counts, region_size, total_sites, verbose):
 
         for nuc, count in sorted(counts.items(), key=itemgetter(1), \
                                  reverse=True):
+
             freq = float(count) / float(sum_counts)
-            vals = map(str, [nuc, offset, region_size, count, freq,
-                             total_sites])
+            norm_freq = freq * bkgd_freqs[nuc]
+
+            vals = map(str, [nuc, offset, region_size, count,
+                             freq, norm_freq, total_sites])
             print '\t'.join(vals)
 
-def debug_report(nuc_counts):
-    ''' debug counts at specific positions. currently calculates the sum
-    of frequencies a the 3' most position '''
+def calc_nuc_freqs(fasta, region_size, verbose):
+    ''' calculate nuc frequencies for normalization.
 
-    for offset, counts in sorted(nuc_counts.items()):
+        Returns: dict of nucleotide frequencies.
+    '''
 
-        sum_counts = sum(counts.values())
-        sums = Counter()
+    if verbose:
+        print >>sys.stderr, ">> calculating dinuc frequencies"
 
-        for nuc, count in sorted(counts.items(), key=itemgetter(1), \
-                                 reverse=True):
-            
-            freq = float(count) / float(sum_counts)
-            sums[nuc[-1]] += freq
+    nuc_counts = Counter()
+    nuc_freqs = {}
 
-        for nuc, nucsum in sums.items():
-            vals = map(str, ['#>>debug', nuc, offset, nucsum])
-            print >>sys.stderr, '\t'.join(vals)
+    for chrom, seq in fasta.items():
 
+        for idx, pos in enumerate(seq):
+           nucs = seq[idx:idx+region_size]
+
+            if len(nucs) < region_size: continue
+
+            nuc_counts[nucs] += 1
+
+    nuc_sum = float(sum(nuc_counts.values()))
+
+    for nucs, count in nuc_count.items():
+        nuc_freqs[nucs] = float(count) / nuc_sum
+
+    return dinuc_freqs
+    
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
 
