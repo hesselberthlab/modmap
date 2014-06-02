@@ -11,6 +11,7 @@ from operator import itemgetter
 from itertools import izip
 from collections import Counter, defaultdict
 
+from toolshed import reader
 from pyfasta import Fasta, complement
 
 from .common import load_coverage
@@ -24,7 +25,7 @@ __version__ = '0.1'
 def nuc_frequencies(bam_filename, fasta_filename, 
                     revcomp_strand, min_counts, 
                     offset_min, offset_max, region_size,
-                    ignore_chroms, only_chroms, norm_freqs,
+                    ignore_chroms, only_chroms, background_freq_filename,
                     verbose):
 
     pos_signal_bedtool = load_coverage(bam_filename, strand='pos',
@@ -38,7 +39,8 @@ def nuc_frequencies(bam_filename, fasta_filename,
                                               offset_min, offset_max, region_size,
                                               ignore_chroms, only_chroms, verbose)
 
-    print_report(nuc_counts, region_size, total_sites, verbose)
+    print_report(nuc_counts, background_freq_filename, 
+                 region_size, total_sites, verbose)
 
 def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename, 
                     revcomp_strand, min_counts, 
@@ -126,12 +128,12 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
 
     return total_sites, nuc_counts
 
-def print_report(nuc_counts, region_size, total_sites, norm_freqs, verbose):
+def print_report(nuc_counts, freq_background_filename,
+                 region_size, total_sites, verbose):
     ''' print report of nuc_counts with frequency calculations '''
 
-    # calculate background frequencies for normatlization
-    fasta = Fasta(fastafilename)
-    bkgd_freqs = calc_nuc_freqs(fasta, region_size, verbose)
+    if freq_background_filename:
+        bkgd_freqs = load_background_file(freq_background_filename)
 
     # report the results
     header = ('#nuc','offset','region.size','count',
@@ -145,40 +147,26 @@ def print_report(nuc_counts, region_size, total_sites, norm_freqs, verbose):
                                  reverse=True):
 
             freq = float(count) / float(sum_counts)
-            norm_freq = freq * bkgd_freqs[nuc]
+            if freq_background_filename:
+                norm_freq = freq * bkgd_freqs[region_size][nuc]
+            else:
+                # XXX fall through?
+                norm_freq = freq
 
             vals = map(str, [nuc, offset, region_size, count,
                              freq, norm_freq, total_sites])
             print '\t'.join(vals)
 
-def calc_nuc_freqs(fasta, region_size, verbose):
-    ''' calculate nuc frequencies for normalization.
+  
+def load_background_file(freq_background_filename):
+    result = {}
+    colnames = ['region.size','nuc','count','freq']
 
-        Returns: dict of nucleotide frequencies.
-    '''
+    for row in reader(freq_background_filename, header=colnames):
+        result[nuc] = float(freq)
 
-    if verbose:
-        print >>sys.stderr, ">> calculating dinuc frequencies"
+    return result
 
-    nuc_counts = Counter()
-    nuc_freqs = {}
-
-    for chrom, seq in fasta.items():
-
-        for idx, pos in enumerate(seq):
-           nucs = seq[idx:idx+region_size]
-
-            if len(nucs) < region_size: continue
-
-            nuc_counts[nucs] += 1
-
-    nuc_sum = float(sum(nuc_counts.values()))
-
-    for nucs, count in nuc_count.items():
-        nuc_freqs[nucs] = float(count) / nuc_sum
-
-    return dinuc_freqs
-    
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
 
@@ -227,6 +215,11 @@ def parse_options(args):
         help="list of chroms to include"
         " (default: %default)")
 
+    group.add_option("--background-freq-table", action="store",
+        metavar="FILE", default=None,
+        help="file with table of background frequencies"
+        " (default: %default)")
+
     group.add_option("-v", "--verbose", action="store_true",
         default=False, help="verbose output (default: %default)")
 
@@ -259,7 +252,8 @@ def main(args=sys.argv[1:]):
               'region_size':options.region_size,
               'verbose':options.verbose,
               'ignore_chroms':ignore_chroms,
-              'only_chroms':only_chroms}
+              'only_chroms':only_chroms,
+              'background_freq_filename':options.background_freq_table}
 
     bam_filename = args[0]
     fasta_filename = args[1]
