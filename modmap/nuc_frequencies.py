@@ -135,6 +135,8 @@ def print_report(nuc_counts, freq_background_filename,
     if freq_background_filename:
         bkgd_freqs = load_background_file(freq_background_filename)
 
+    pdb.set_trace()
+
     # report the results
     header = ('#nuc','offset','region.size','count',
               'freq','norm.freq','total.sites') 
@@ -148,7 +150,7 @@ def print_report(nuc_counts, freq_background_filename,
 
             freq = float(count) / float(sum_counts)
             if freq_background_filename:
-                norm_freq = freq * bkgd_freqs[region_size][nuc]
+                norm_freq = freq * bkgd_freqs[region_size][str(nuc)]
             else:
                 # XXX fall through?
                 norm_freq = freq
@@ -159,11 +161,14 @@ def print_report(nuc_counts, freq_background_filename,
 
   
 def load_background_file(freq_background_filename):
-    result = {}
+    result = defaultdict(dict)
     colnames = ['region.size','nuc','count','freq']
 
-    for row in reader(freq_background_filename, header=colnames):
-        result[nuc] = float(freq)
+    for row in reader(freq_background_filename):
+        region_size = int(row['region.size'])
+        nuc = row['nuc']
+        freq = float(row['freq'])
+        result[region_size][nuc] = freq
 
     return result
 
