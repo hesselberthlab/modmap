@@ -43,6 +43,7 @@ def calc_nuc_counts(fasta_filename, region_size_min,
     for chrom, seq in fasta.items():
 
         for idx, pos in enumerate(seq):
+
             for region_size in range(region_size_min,
                                      region_size_max + 1):
 
