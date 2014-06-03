@@ -60,6 +60,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
                 --region-size $size \
                 $ignore_arg \
                 --revcomp-strand \
+                --background-freq-table $BKGD_FREQS \
                 --verbose \
                 >> $output
         done
