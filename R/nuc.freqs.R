@@ -21,7 +21,7 @@ sample.name = output[2]
 output.dir = output[3]
 
 COLNAMES <- c('nuc','offset','region.size','count',
-              'freq','total.sites')
+              'freq','norm.freq','total.sites')
 df <- read.table(infile, col.names=COLNAMES)
 
 if (nrow(df) == 0) {
