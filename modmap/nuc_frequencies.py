@@ -135,8 +135,6 @@ def print_report(nuc_counts, freq_background_filename,
     if freq_background_filename:
         bkgd_freqs = load_background_file(freq_background_filename)
 
-    pdb.set_trace()
-
     # report the results
     header = ('#nuc','offset','region.size','count',
               'freq','norm.freq','total.sites') 
@@ -149,8 +147,11 @@ def print_report(nuc_counts, freq_background_filename,
                                  reverse=True):
 
             freq = float(count) / float(sum_counts)
+
             if freq_background_filename:
-                norm_freq = freq * bkgd_freqs[region_size][str(nuc)]
+                norm_factor = bkgd_freqs[region_size][nuc]
+                norm_freq = freq / norm_factor
+
             else:
                 # XXX fall through?
                 norm_freq = freq
@@ -161,8 +162,8 @@ def print_report(nuc_counts, freq_background_filename,
 
   
 def load_background_file(freq_background_filename):
+    ''' load genome nuc frequencies from pre-computed background file '''
     result = defaultdict(dict)
-    colnames = ['region.size','nuc','count','freq']
 
     for row in reader(freq_background_filename):
         region_size = int(row['region.size'])
