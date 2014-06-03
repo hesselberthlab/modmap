@@ -30,6 +30,7 @@ for assembly in ${ASSEMBLIES[@]}; do
     export CHROM_SIZES=$HOME/ref/genomes/$assembly/$assembly.chrom.sizes
     export GTF=$HOME/ref/genomes/$assembly/sgdGene.$assembly.gtf
     export FASTA=$HOME/ref/genomes/$assembly/$assembly.fa
+    export BKGD_FREQS="$HOME/ref/genomes/$assembly/$assembly.genome.nuc.freqs.tab"
     
     job_array="[1-$NUM_SAMPLES]"
 
