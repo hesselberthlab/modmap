@@ -47,8 +47,8 @@ for strand in ${strands[@]}; do
             -n $exp_name \
             --keep-dup all \
             --nomodel \
-            -s 25 \
-            --extsize 5 \
+            --tsize 25 \
+            --extsize 50 \
             --gsize $genomesize \
             --call-summits
 
