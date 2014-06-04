@@ -25,25 +25,37 @@ fi
 # count thresholds
 count_thresh="1 10 30"
 
-for inc_idx in ${!include_modes[@]}; do
+for aln_idx in ${!ALIGN_MODES[@]}; do
 
-    include_mode=${include_modes[$inc_idx]}
+    align_mode=${ALIGN_MODES[$aln_idx]}
 
-    # -------------------------------------------------------
-    # --- nuc_freq plots ------------------------------------
+    # --- expression plots --------------------------------------
+    subplotdir="$plotdir/expression_analysis"
+    if [[ ! -d $subplotdir ]]; then
+        mkdir -p $subplotdir
+    fi
+
+    region_types=('mrna' 'promoters')
+    for region_type in ${region_types[@]}; do
+        counts="$results/expression_analysis/exp_analysis.$region_type.align.$align_mode.tab"
+        sampleid="$sample.align-$align_mode.region-$region_type"
+        Rscript $RSCRIPTS/exp.plots.R $counts "$sampleid" $subplotdir
+    done
+
     for mincount in $count_thresh; do
+        for ig_idx in ${!include_modes[@]}; do
 
-        plottypes=("hist" "scatter")
-        for plot_type in ${plottypes[@]}; do
+            include_mode=${include_modes[$ig_idx]}
 
-            subplotdir="$plotdir/nuc_freqs/$plot_type/min-count-$mincount"
+            # --- nuc_freq plots ------------------------------------
+            subplotdir="$plotdir/nuc_freqs"
             if [[ ! -d $subplotdir ]]; then
                 mkdir -p $subplotdir
             fi
 
-            counts="$results/nuc_freqs/$sample.include.$include_mode.mincount.$mincount.nuc_freqs.tab.gz"
-            sampleid="$sample.subset-$include_mode"
-            Rscript --vanilla $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $plot_type $subplotdir
+            counts="$subplotdir/$sample.align.$align_mode.include.$include_mode.mincount.$mincount.nuc_freqs.tab"
+            sampleid="$sample.align-$align_mode.subset-$include_mode.mincount-$mincount"
+            Rscript $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $subplotdir
         done
     done
 done
