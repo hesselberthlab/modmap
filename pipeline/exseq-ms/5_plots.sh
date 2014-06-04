@@ -53,7 +53,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
                 mkdir -p $subplotdir
             fi
 
-            counts="$subplotdir/$sample.align.$align_mode.include.$include_mode.mincount.$mincount.nuc_freqs.tab"
+            counts="$results/nuc_freqs/$sample.align.$align_mode.include.$include_mode.mincount.$mincount.nuc_freqs.tab"
             sampleid="$sample.align-$align_mode.subset-$include_mode.mincount-$mincount"
             Rscript $RSCRIPTS/nuc.freqs.R $counts "$sampleid" $subplotdir
         done
