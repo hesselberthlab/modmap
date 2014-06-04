@@ -50,7 +50,7 @@ for idx in ${!ALIGN_MODES[@]}; do
 
         for mincount in $count_thresh; do
 
-            output="$results/$sample.include.$include_mode.mincount.$mincount.nuc_freqs.tab"
+            output="$results/$sample.align.$align_mode.include.$include_mode.mincount.$mincount.nuc_freqs.tab"
 
             if [[ -f $output ]]; then
                 rm -f $output
