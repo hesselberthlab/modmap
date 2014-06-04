@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
 #BSUB -J gd.create
-#BSUB -e log/gd.create.%J.err
-#BSUB -o log/gd.create.%J.out
+#BSUB -e gd.create.%J.err
+#BSUB -o gd.create.%J.out
 
 set -o nounset -o pipefail -o errexit -x
 source config.sh
