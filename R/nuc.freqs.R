@@ -21,7 +21,7 @@ sample.name = output[2]
 output.dir = output[3]
 
 COLNAMES <- c('nuc','offset','region.size','count',
-              'freq','norm.freq','total.sites')
+              'freq','type','total.sites')
 df <- read.table(infile, col.names=COLNAMES)
 
 if (nrow(df) == 0) {
@@ -56,6 +56,8 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
     gp <- gp + geom_point(aes(x = offset, y = freq, 
                               color = nuc, size = 3),
                           show_guide = FALSE)
+
+    gp <- gp + facet_grid(. ~ type)
   
     gp <- gp + theme_bw()
     gp <- gp + theme(legend.position = 'bottom')
