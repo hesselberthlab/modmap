@@ -148,17 +148,21 @@ def print_report(nuc_counts, freq_background_filename,
 
             freq = float(count) / float(sum_counts)
 
-            if freq_background_filename:
-                norm_factor = bkgd_freqs[region_size][nuc]
-                norm_freq = freq / norm_factor
-
-            else:
-                # XXX fall through?
-                norm_freq = freq
-
+            freq_type = 'raw'
             vals = map(str, [nuc, offset, region_size, count,
-                             freq, norm_freq, total_sites])
+                             freq, freq_type, total_sites])
             print '\t'.join(vals)
+
+            # write out normalized frequencies if requested
+            if freq_background_filename:
+
+                norm_factor = bkgd_freqs[region_size][nuc]
+                freq = freq / norm_factor
+
+                freq_type = 'norm'
+                vals = map(str, [nuc, offset, region_size, count,
+                                 freq, freq_type, total_sites])
+                print '\t'.join(vals)
 
   
 def load_background_file(freq_background_filename):
