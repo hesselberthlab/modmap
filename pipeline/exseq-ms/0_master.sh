@@ -42,6 +42,9 @@ for assembly in ${ASSEMBLIES[@]}; do
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
 
+    # these jobs generate other jobs like:
+    # nuc_freqs_calc.nuc_freqs_$ASSEMBLY.*
+    # e.g. wait on "nuc_freqs_calc.nuc_freqs_sacCer1*"
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/3_nuc_freqs.sh
