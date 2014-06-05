@@ -37,7 +37,9 @@ fi
 # need to be in BIN to run module
 cd $BIN
 
-jobnames=""
+# keep running list of job ids
+jobids=""
+
 for idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$idx]}
     align_arg=${ALIGN_ARGS[$idx]}
@@ -69,15 +71,21 @@ for idx in ${!ALIGN_MODES[@]}; do
                     --verbose \
                     >> $output"
                 jobname="nuc_freqs_calc.$LSB_JOBID.$LSB_JOBINDEX"
-                bsub -J $jobname \
+                retval=$(bsub -J $jobname \
                      -o "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.out" \
                      -e "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.err" \
-                     $cmd
-                jobnames="$jobnames $jobname"
+                     $cmd)
+
+                # XXX nasty hack to get jobid
+                jobid=$(echo $retval \
+                        | grep -Po 'Job <[^>]*>' \
+                        | sed 's/Job <//g; s/>//g')
+                jobids="$jobids $jobid"
+
             done
         done
     done
 done
 
 # wait until all jobs are done before exiting
-python -m bsub $jobnames
+python -m bsub $jobids
