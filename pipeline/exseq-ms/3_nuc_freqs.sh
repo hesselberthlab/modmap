@@ -37,6 +37,7 @@ fi
 # need to be in BIN to run module
 cd $BIN
 
+jobnames=""
 for idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$idx]}
     align_arg=${ALIGN_ARGS[$idx]}
@@ -59,15 +60,24 @@ for idx in ${!ALIGN_MODES[@]}; do
             # signals need to be reverse complemented because the sequence is
             # the reverse complement of the captured strand
             for size in $sizes; do
-                python -m modmap.nuc_frequencies \
+                cmd="python -m modmap.nuc_frequencies \
                     $BAM $FASTA \
                     --region-size $size \
                     $include_arg \
                     --background-freq-table $BKGD_FREQS \
+                    --minimum-counts $mincount \
                     --verbose \
-                    >> $output
+                    >> $output"
+                jobname="nuc_freqs_calc.$LSB_JOBID.$LSB_JOBINDEX"
+                bsub -J $jobname \
+                     -o "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.out" \
+                     -e "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.err" \
+                     $cmd
+                jobnames="$jobnames $jobname"
             done
         done
     done
 done
 
+# wait until all jobs are done before exiting
+python -m bsub $jobnames
