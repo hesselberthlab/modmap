@@ -57,7 +57,7 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
                               color = nuc, size = 3),
                           show_guide = FALSE)
 
-    gp <- gp + facet_grid(. ~ type, scales = "free_y")
+    gp <- gp + facet_wrap(~type, scales = "free_y")
   
     gp <- gp + theme_bw()
     gp <- gp + theme(legend.position = 'bottom')
