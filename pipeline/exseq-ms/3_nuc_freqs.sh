@@ -29,6 +29,7 @@ count_thresh="1 10 30"
 
 alignments=$RESULT/$sample/alignments
 results=$RESULT/$sample/nuc_freqs
+logdir=$(pwd)
 
 if [[ ! -d $results ]]; then
     mkdir -p $results
@@ -72,8 +73,8 @@ for idx in ${!ALIGN_MODES[@]}; do
                     >> $output"
                 jobname="nuc_freqs_calc.$LSB_JOBID.$LSB_JOBINDEX"
                 retval=$(bsub -J $jobname \
-                     -o "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.out" \
-                     -e "nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.err" \
+                     -o "$logdir/nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.out" \
+                     -e "$logdir/nuc_freq_calc.$LSB_JOBID.$LSB_JOBINDEX.err" \
                      $cmd)
 
                 # XXX nasty hack to get jobid
