@@ -141,7 +141,14 @@ def print_report(nuc_counts, freq_background_filename,
     print '\t'.join(header)
 
     for offset, counts in sorted(nuc_counts.items()):
+
         sum_counts = sum(counts.values())
+
+        # recalculate offset to keep modified base in the 3' position
+        # for region_size 1, there is no shift. for all other sizes, the
+        # shift is 1 fewer than the region_size
+        offset_shift = region_size - 1
+        report_offset = offset - offset_shift
 
         for nuc, count in sorted(counts.items(), key=itemgetter(1), \
                                  reverse=True):
@@ -149,7 +156,7 @@ def print_report(nuc_counts, freq_background_filename,
             freq = float(count) / float(sum_counts)
 
             freq_type = 'raw'
-            vals = map(str, [nuc, offset, region_size, count,
+            vals = map(str, [nuc, report_offset, region_size, count,
                              freq, freq_type, total_sites])
             print '\t'.join(vals)
 
@@ -160,7 +167,7 @@ def print_report(nuc_counts, freq_background_filename,
                 freq = freq / norm_factor
 
                 freq_type = 'norm'
-                vals = map(str, [nuc, offset, region_size, count,
+                vals = map(str, [nuc, report_offset, region_size, count,
                                  freq, freq_type, total_sites])
                 print '\t'.join(vals)
 
