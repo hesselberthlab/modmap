@@ -5,7 +5,7 @@ DEBUG="-debug"
 
 # XXX SAMPLES and DESCRIPS and COLORS must be in same order
 
-SAMPLES=(FS1 FS2 FS3 FS4 FS5 FS6 FS7 FS8 FS9 FS10)
+SAMPLES=(FS1 FS2 FS3 FS4 FS5 FS6 FS7 FS8 FS9 FS10 FS14 FS15 FS16)
 NUM_SAMPLES=${#SAMPLES[@]}
 DESCRIPS=("YFP17, rnh1 rnh201 / RE"
           "YFP17, rnh1 rnh201 / Fragmentase"
@@ -16,7 +16,10 @@ DESCRIPS=("YFP17, rnh1 rnh201 / RE"
           "E134, rnh201, rep2"
           "YFP17, rnh201"
           "YFP17, pol2-M644G rnh201"
-          "E134, rnh1 rnh201")
+          "E134, rnh1 rnh201"
+          "YFP17, rnh1 rnh201",
+          "E134, rnh201",
+          "YFP17, rnh1 rnh201 / Taq")
 
 COLORS=("228,26,28",
         "228,26,28",
@@ -27,7 +30,11 @@ COLORS=("228,26,28",
         "77,175,74",
         "166,86,40"
         "152,78,163",
-        "255,127,0")
+        "255,127,0",
+        "228,26,28",
+        "228,26,28",
+        "228,26,28"
+        )
 
 DATA=$HOME/projects/collab/storici-lab/data/common
 BIN=$HOME/devel/modmap
