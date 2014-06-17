@@ -29,12 +29,12 @@ for umi_type in ${umi_types[@]}; do
 
         if [[ $umi_type == 'removed' ]]; then
             bam=$results/alignment/$sample.align.$align_mode.bam
-            countsbg=$bgresults/$sample.align.$align_mode.strand.both.counts.bg
+            countsbg=$bgresults/$sample.align.$align_mode.strand.all.counts.bg
             countsposbg=$bgresults/$sample.align.$align_mode.strand.pos.counts.bg
             countsnegbg=$bgresults/$sample.align.$align_mode.strand.neg.counts.bg
         else
             bam=$results/alignment/$sample.$umi_type.align.$align_mode.bam
-            countsbg=$bgresults/$sample.$umi_type.align.$align_mode.strand.both.counts.bg
+            countsbg=$bgresults/$sample.$umi_type.align.$align_mode.strand.all.counts.bg
             countsposbg=$bgresults/$sample.$umi_type.align.$align_mode.strand.pos.counts.bg
             countsnegbg=$bgresults/$sample.$umi_type.align.$align_mode.strand.neg.counts.bg
         fi
