@@ -14,7 +14,7 @@ set -o nounset -o pipefail -o errexit -x
 source $CONFIG
 
 urlbase="http://amc-sandbox.ucdenver.edu"
-strands=("both" "pos" "neg")
+strands=("all" "pos" "neg")
 umi_types=("removed" "UMIs_not_removed")
 
 tracklinefile=$RESULT/tracklines.txt
