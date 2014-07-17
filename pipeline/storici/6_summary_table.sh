@@ -25,13 +25,13 @@ bedgraphs=""
 samplenames=""
 
 for strand in ${strands[@]}; do
-    for align_mode in ${!ALIGN_MODES[@]}; do
+    for align_mode in ${ALIGN_MODES[@]}; do
 
         result="$results/summary_table.align.$align_mode.strand.$strand.tab"
 
-        for sample in $SAMPLES; do
+        for sample in ${SAMPLES[@]}; do
             bedgraph_dir=$RESULT/$sample/bedgraphs
-            bedgraph="$bedgraph_dir/$sample.align.$align_mode.strand.$strand.bg"
+            bedgraph="$bedgraph_dir/$sample.align.$align_mode.strand.$strand.counts.bg"
             bedgraphs="$bedgraphs $bedgraph"
 
             sampleid="$sample"
