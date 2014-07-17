@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-#BSUB -J nuc.freqs[1-10]
+#BSUB -J nuc.freqs[1-13]
 #BSUB -e nuc.freqs.%J.%I.err
 #BSUB -o nuc.freqs.%J.%I.out
 #BSUB -q normal

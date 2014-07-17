@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-#BSUB -J ori.analysis[1-10]
+#BSUB -J ori.analysis[1-13]
 #BSUB -e ori.analysis.%J.%I.err
 #BSUB -o ori.anlaysis.%J.%I.out
 #BSUB -q normal

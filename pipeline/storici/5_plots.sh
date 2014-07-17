@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-#BSUB -J plots[1-10]
+#BSUB -J plots[1-13]
 #BSUB -e plots.%J.%I.err
 #BSUB -o plots.%J.%I.out
 #BSUB -q normal
