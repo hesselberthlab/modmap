@@ -3,7 +3,7 @@
 #BSUB -J master
 #BSUB -e master.%J.err
 #BSUB -o master.%J.out
-#BSUB -q normal
+#BSUB -q priority
 #BSUB -P exseq
 
 <<DOC
