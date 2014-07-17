@@ -20,12 +20,13 @@ fi
 
 strands=("pos" "neg")
 
-# keep a running tally of the bedgraph files and sample IDs
-bedgraphs=""
-samplenames=""
-
 for strand in ${strands[@]}; do
+
     for align_mode in ${ALIGN_MODES[@]}; do
+
+        # keep a running tally of the bedgraph files and sample IDs
+        bedgraphs=""
+        samplenames=""
 
         result="$results/summary_table.align.$align_mode.strand.$strand.tab"
 
