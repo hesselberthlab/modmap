@@ -47,6 +47,7 @@ for assembly in ${ASSEMBLIES[@]}; do
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
 
+
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/3_nuc_freqs.sh
@@ -58,6 +59,11 @@ for assembly in ${ASSEMBLIES[@]}; do
     bsub -J "exp_anal_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/expression_analysis.sh
+
+    # wait until *all* coverage jobs are complete
+    bsub -J "summary_table_$ASSEMBLY" \
+        -w "done('coverage_$ASSEMBLY*')" \
+        < $PIPELINE/6_summary_table.sh
 
     bsub -J "plots_$ASSEMBLY$job_array" \
         -w "done('origin_anal_$ASSEMBLY[*]') && \
