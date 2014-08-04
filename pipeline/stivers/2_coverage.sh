@@ -12,7 +12,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/projects/collab/stivers-lab/bin/config.sh
+source $HOME/devel/modmap/pipeline/stivers/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 results=$RESULT/$sample
@@ -50,8 +50,8 @@ for bwt_idx in ${!BOWTIEIDXS[@]}; do
             strand=${strands[$strand_idx]}
             strand_arg=${strand_args[$strand_idx]}
 
-            bedgraph=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bg
-            tab=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.tab
+            bedgraph=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bg.gz
+            tab=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.tab.gz
 
             bedtools genomecov -bg -g $CHROM_SIZES \
                 -ibam $bam $strand_arg -scale $scale_pm \
@@ -61,20 +61,20 @@ for bwt_idx in ${!BOWTIEIDXS[@]}; do
             bedtools genomecov -d -g $CHROM_SIZES \
                 -ibam $bam $strand_arg -scale $scale_pm \
                 | gzip -c \
-                > $bedgraph
+                > $tab
 
             # create bigwigs
-            bigwig=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bw
+            #bigwig=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bw
             
-            if [[ $index_type == "virus" ]]; then
-                chromsize=$CHROM_SIZES_VIRUS
-            elif [[ $index_type == "plasmid" ]]; then
-                chromsize=$CHROM_SIZES_PLASMID
-            else
-                chromsize=$CHROM_SIZES
-            fi
+            #if [[ $index_type == "virus" ]]; then
+            #    chromsize=$CHROM_SIZES_VIRUS
+            #elif [[ $index_type == "plasmid" ]]; then
+            #    chromsize=$CHROM_SIZES_PLASMID
+            #else
+            #    chromsize=$CHROM_SIZES
+            #fi
 
-            bedGraphToBigWig $bedgraph $chromsize $bigwig
+            #bedGraphToBigWig $bedgraph $chromsize $bigwig
         done
     done
 done
