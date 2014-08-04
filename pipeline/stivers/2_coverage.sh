@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#BSUB -J coverage[1-56]%8
+#BSUB -J coverage[1-56]%12
 #BSUB -e coverage.%J.%I.err
 #BSUB -o coverage.%J.%I.out
 #BSUB -q normal
@@ -58,7 +58,7 @@ for bwt_idx in ${!BOWTIEIDXS[@]}; do
                 | gzip -c \
                 > $bedgraph
 
-            bedtools genomecov -d -g $CHROM_SIZES \
+            bedtools genomecov -dz -g $CHROM_SIZES \
                 -ibam $bam $strand_arg -scale $scale_pm \
                 | gzip -c \
                 > $tab
