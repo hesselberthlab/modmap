@@ -5,7 +5,7 @@
 #BSUB -R "span[hosts=1]"
 #BSUB -q normal
 #BSUB -P stivers
-#BSUB -n 8
+#BSUB -n 12
 
 <<DOC
 Trim the UMI from the FASTQ, align trimmed reads using bowtie suppressing 
@@ -15,7 +15,7 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-source $HOME/projects/collab/stivers-lab/bin/config.sh
+source $HOME/devel/modmap/pipeline/stivers/config.sh
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 fastq=$DATA/$sample.fq.gz
@@ -25,7 +25,7 @@ if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
 
-threads=6
+threads=12
 
 for bwt_idx in ${!BOWTIEIDXS[@]}; do
 
