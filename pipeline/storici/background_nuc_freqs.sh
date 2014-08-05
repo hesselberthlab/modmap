@@ -1,8 +1,8 @@
 #! /usr/bin/env bash
 
-#BSUB -J background.nuc.freqs[1-3]
-#BSUB -e bkgd.nuc.freqs.%J.%I.err
-#BSUB -o bkgd.nuc.freqs.%J.%I.out
+#BSUB -J background.nuc.freqs
+#BSUB -e bkgd.nuc.freqs.%J.err
+#BSUB -o bkgd.nuc.freqs.%J.out
 #BSUB -q normal
 
 <<DOC
@@ -17,9 +17,7 @@ source $CONFIG
 BIN=$HOME/devel/modmap
 cd $BIN
 
-assembly=${ASSEMBLIES[$(($LSB_JOBINDEX - 1))]}
-
-output="$RESULT/$assembly.genome.nuc.freqs.tab"
+output="$RESULT/$ASSEMBLY.genome.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -29,7 +27,7 @@ if [[ ! -f $output ]]; then
         > $output
 fi
 
-output="$RESULT/$assembly.chrM.nuc.freqs.tab"
+output="$RESULT/$ASSEMBLY.chrM.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -40,8 +38,8 @@ if [[ ! -f $output ]]; then
         > $output
 fi
 
-if [[ $assembly == "sacCer2" ]]; then
-    output="$RESULT/$assembly.2micron.nuc.freqs.tab"
+if [[ $ASSEMBLY == "sacCer2" ]]; then
+    output="$RESULT/$ASSEMBLY.2micron.nuc.freqs.tab"
     if [[ ! -f $output ]]; then
         python -m modmap.genome_nuc_freqs \
             $FASTA \

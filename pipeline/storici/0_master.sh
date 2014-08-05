@@ -34,7 +34,7 @@ for assembly in ${ASSEMBLIES[@]}; do
     job_array="[1-$NUM_SAMPLES]"
 
     # 1 job for each of 3 assemblies
-    bsub -J "bkgd_freqs[1-3]" \
+    bsub -J "bkgd_freqs_$ASSEMBLY" \
         < $PIPELINE/background_nuc_freqs.sh
 
     # job names look like: align_sacCer1[1-10]
@@ -52,7 +52,7 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]') && \
-            done('bkgd_freqs*')" \
+            done('bkgd_freqs_$ASSEMBLY')" \
         < $PIPELINE/3_nuc_freqs.sh
 
     bsub -J "origin_anal_$ASSEMBLY$job_array" \
