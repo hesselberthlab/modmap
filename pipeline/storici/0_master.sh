@@ -30,9 +30,12 @@ for assembly in ${ASSEMBLIES[@]}; do
     export CHROM_SIZES=$HOME/ref/genomes/$assembly/$assembly.chrom.sizes
     export GTF=$HOME/ref/genomes/$assembly/sgdGene.$assembly.gtf
     export FASTA=$HOME/ref/genomes/$assembly/$assembly.fa
-    export BKGD_FREQS="$HOME/ref/genomes/$assembly/$assembly.genome.nuc.freqs.tab"
     
     job_array="[1-$NUM_SAMPLES]"
+
+    # 1 job for each of 3 assemblies
+    bsub -J "bkgd_freqs[1-3]" \
+        < $PIPELINE/background_nuc_freqs.sh
 
     # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
@@ -47,9 +50,9 @@ for assembly in ${ASSEMBLIES[@]}; do
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
 
-
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
-        -w "done('align_$ASSEMBLY[*]')" \
+        -w "done('align_$ASSEMBLY[*]') && \
+            done('bkgd_freqs*')" \
         < $PIPELINE/3_nuc_freqs.sh
 
     bsub -J "origin_anal_$ASSEMBLY$job_array" \

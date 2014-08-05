@@ -52,6 +52,14 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
             rm -f $output
         fi
 
+        if [[ $ignore_mode == "only-mito" ]]; then
+            BKGD_FREQS="$RESULT/$assembly.chrM.nuc.freqs.tab"
+        elif [[ $ignore_mode == "only-2micron" ]]; then
+            BKGD_FREQS="$RESULT/$assembly.2micron.nuc.freqs.tab"
+        else
+            BKGD_FREQS="$RESULT/$assembly.genome.nuc.freqs.tab"
+        fi
+
         # signals need to be reverse complemented because the sequence is
         # the reverse complement of the captured strand
         for size in $sizes; do
