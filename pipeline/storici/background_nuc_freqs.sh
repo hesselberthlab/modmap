@@ -11,16 +11,15 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
+source $CONFIG
+
 # need to be in BIN to run module
 BIN=$HOME/devel/modmap
 cd $BIN
 
-ASSEMBLIES=(sacCer1 sacCer2 sacCer3)
 assembly=${ASSEMBLIES[$(($LSB_JOBINDEX - 1))]}
 
-output="$HOME/ref/genomes/$assembly/$assembly.genome.nuc.freqs.tab"
-FASTA="$HOME/ref/genomes/$assembly/$assembly.fa"
-
+output="$RESULT/$assembly.genome.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -30,9 +29,7 @@ if [[ ! -f $output ]]; then
         > $output
 fi
 
-output="$HOME/ref/genomes/$assembly/$assembly.chrM.nuc.freqs.tab"
-FASTA="$HOME/ref/genomes/$assembly/$assembly.chrM.fa"
-
+output="$RESULT/$assembly.chrM.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -44,9 +41,7 @@ if [[ ! -f $output ]]; then
 fi
 
 if [[ $assembly == "sacCer2" ]]; then
-    output="$HOME/ref/genomes/$assembly/$assembly.2micron.nuc.freqs.tab"
-    FASTA="$HOME/ref/genomes/$assembly/$assembly.2micron.fa"
-
+    output="$RESULT/$assembly.2micron.nuc.freqs.tab"
     if [[ ! -f $output ]]; then
         python -m modmap.genome_nuc_freqs \
             $FASTA \
