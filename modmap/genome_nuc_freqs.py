@@ -13,13 +13,14 @@ __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
 def genome_nuc_freqs(fasta_filename, region_size_min, region_size_max,
-                     verbose):
+                     ignore_chroms, only_chroms, verbose):
 
     header = ('#region.size','nuc','count','freq')
     print '\t'.join(header)
 
     nuc_counts = calc_nuc_counts(fasta_filename, region_size_min,
-                                 region_size_max, verbose)
+                                 region_size_max, ignore_chroms,
+                                 only_chroms, verbose)
 
     for region_size in nuc_counts:
 
@@ -30,7 +31,8 @@ def genome_nuc_freqs(fasta_filename, region_size_min, region_size_max,
             print '%d\t%s\t%s\t%s' % (region_size, nuc, str(count), str(nuc_freq))
 
 def calc_nuc_counts(fasta_filename, region_size_min,
-                    region_size_max, verbose):
+                    region_size_max, ignore_chroms,
+                    only_chroms, verbose):
     ''' calculate nuc frequencies for normalization.
 
         Returns: dict of nucleotide frequencies.
@@ -41,6 +43,11 @@ def calc_nuc_counts(fasta_filename, region_size_min,
     fasta = Fasta(fasta_filename)
 
     for chrom, seq in fasta.items():
+
+        # skip data based on specified chromosomes
+        if chrom in ignore_chroms: continue
+
+        if only_chroms and chrom not in only_chroms: continue
 
         for idx, pos in enumerate(seq):
 
@@ -77,6 +84,16 @@ def parse_options(args):
         help="maximum region size "
         " (default: %default)")
 
+    group.add_option("--ignore-chrom", action="append",
+        metavar="CHROM", default=[],
+        help="list of chroms to ignore"
+        " (default: %default)")
+
+    group.add_option("--only-chrom", action="append",
+        metavar="CHROM", default=[],
+        help="list of chroms to include"
+        " (default: %default)")
+
     group.add_option("-v", "--verbose", action="store_true",
         default=False, help="verbose output (default: %default)")
 
@@ -87,14 +104,22 @@ def parse_options(args):
     if len(args) != 1:
         parser.error("specify FASTA")
 
+    if len(options.ignore_chrom) != 0 and len(options.only_chrom) != 0:
+        parser.error("--ignore-chrom and --only-chrom are mutually exclusive ")
+
     return options, args
 
 def main(args=sys.argv[1:]):
 
     options, args = parse_options(args)
 
+    ignore_chroms = tuple(options.ignore_chrom)
+    only_chroms = tuple(options.only_chrom)
+
     kwargs = {'region_size_min':options.region_size_minimum,
               'region_size_max':options.region_size_maximum,
+              'ignore_chroms':ignore_chroms,
+              'only_chroms':only_chroms,
               'verbose':options.verbose}
 
     fasta_filename = args[0]
