@@ -38,6 +38,13 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     # subset data
     df <- subset(df, region.score > 1 & signal > 1)
 
+    # remove outliers
+    box.stats <- boxplot.stats(df$signal)
+    lower.adj <- box.stats[1]
+    upper.adj <- box.stats[5]
+
+    df <- subset(df, signal > lower.adj & signal < upper.adj)
+
     # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
                    summarise, cor = round(cor(region.score, signal), 3))
