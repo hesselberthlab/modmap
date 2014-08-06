@@ -43,7 +43,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     lower.adj <- box.stats[1]
     upper.adj <- box.stats[5]
 
-    df <- df %>% filter(signal > lower.adj & signal < upper.adj)
+    df <- subset(df, signal > lower.adj & signal < upper.adj)
 
     # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
