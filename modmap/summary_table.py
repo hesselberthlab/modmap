@@ -11,7 +11,7 @@ from collections import Counter, defaultdict
 
 from pybedtools import BedTool, Interval
 from toolshed import reader
-from pyfasta import Fasta, complement
+from pyfaidx import Fasta
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -21,19 +21,33 @@ __version__ = '0.1'
 
 def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, verbose):
 
-    bedtools = generate_bedtools(bedgraph_filenames, verbose)
+    signal_bedtools = generate_bedtools(bedgraph_filenames, verbose)
 
-    intersection = calc_intersection(bedtools, verbose)
+    intersection = calc_intersection(signal_bedtools, verbose)
 
     intersection_bedtool = generate_intersection_bedtool(intersection,
-                                                         strand,
+                                                         revcomp,
                                                          verbose)
 
     fasta = generate_fasta(intersection_bedtool, fasta_filename,
-                                revcomp, verbose)
+                           revcomp, verbose)
+ 
+    maps = generate_maps(intersection_bedtool, signal_bedtools, verbose)
 
-    
-def generate_fasta(intersect_bedtool, fasta_filename, revcomp, verbose):
+    strand = 'pos'
+    if revcomp:
+        strand = 'neg'
+
+    headers = ['#chrom','pos','strand','seq']
+    headers.extend(sample_names)
+    print '\t'.join(headers)
+
+    for els in izip(intersection_bedtool, fasta, *maps):
+
+        # XXX waiting for ordered fasta iterating
+        ipdb.set_trace()
+
+def generate_fasta(intersection_bedtool, fasta_filename, revcomp, verbose):
 
     if verbose:
         print >>sys.stderr, ">> generating fasta of positions ..."
@@ -41,17 +55,28 @@ def generate_fasta(intersect_bedtool, fasta_filename, revcomp, verbose):
     # -s: force strandedness
     fasta_seqs = intersection_bedtool.sequence(fi=fasta_filename, s=True)
 
-    # XXX use open(a.seqfn).read() to retrieve data
-    fasta = Fasta(open(fasta_seqs.seqfn).read())
+    fasta = Fasta(fasta_seqs.seqfn)
 
     return fasta
 
 def generate_maps(intersection_bedtool, signal_bedtools, verbose):
+    
+    if verbose:
+        print >>sys.stderr, ">> generating signal maps ..."
 
-def generate_intersection_bedtool(intersection, strand, verbose):
+    map_bedtools = []
+    for signal_bedtool in signal_bedtools:
+
+        signal_map = intersection_bedtool.map(signal_bedtool, c=4,
+                                              o='sum', null='0')
+        map_bedtools.append(signal_map)
+
+    return map_bedtools
+
+def generate_intersection_bedtool(intersection_bedtool, revcomp, verbose):
 
     intervals = []
-    for row in intersect_bedtool:
+    for row in intersection_bedtool:
 
         chrom, start, stop = row.fields[:3]
         name = score = '.'
