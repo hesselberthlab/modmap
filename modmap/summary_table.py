@@ -17,7 +17,7 @@ __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
-# Copyright 2013,2014 Jay R. Hesselberth
+# Copyright 2014 Jay R. Hesselberth
 
 def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, verbose):
 
@@ -38,14 +38,23 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
     if revcomp:
         strand = 'neg'
 
-    headers = ['#chrom','pos','strand','seq']
+    headers = ['#chrom','start','end','strand','seq']
     headers.extend(sample_names)
     print '\t'.join(headers)
 
     for els in izip(intersection_bedtool, fasta, *maps):
 
-        # XXX waiting for ordered fasta iterating
-        ipdb.set_trace()
+        region = els[0]
+        seq = str(els[1])
+
+        signals = []
+        for interval in els[2:]:
+            signals.append(interval.fields[-1])
+
+        fields = [region.chrom, region.start, region.end, strand, seq]
+        fields.extend(signals)
+
+        print '\t'.join(map(str, fields))
 
 def generate_fasta(intersection_bedtool, fasta_filename, revcomp, verbose):
 
