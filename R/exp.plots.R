@@ -39,11 +39,11 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     df <- subset(df, region.score > 1 & signal > 1)
 
     # remove outliers
-    box.stats <- boxplot.stats(df$signal)
+    box.stats <- boxplot.stats(df$region.score)$stats
     lower.adj <- box.stats[1]
     upper.adj <- box.stats[5]
 
-    df <- subset(df, signal > lower.adj & signal < upper.adj)
+    df <- subset(df, region.score > lower.adj & region.score < upper.adj)
 
     # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
