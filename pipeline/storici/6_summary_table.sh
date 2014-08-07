@@ -13,6 +13,8 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 source $CONFIG
+cd $BIN
+
 results=$RESULT/summary_table
 if [[ ! -d $results ]]; then
     mkdir $results
@@ -25,24 +27,26 @@ for strand in ${strands[@]}; do
     for align_mode in ${ALIGN_MODES[@]}; do
 
         # keep a running tally of the bedgraph files and sample IDs
-        bedgraphs=""
-        samplenames=""
+        args=""
 
         result="$results/summary_table.align.$align_mode.strand.$strand.tab"
 
         for sample in ${SAMPLES[@]}; do
             bedgraph_dir=$RESULT/$sample/bedgraphs
             bedgraph="$bedgraph_dir/$sample.align.$align_mode.strand.$strand.counts.bg"
-            bedgraphs="$bedgraphs $bedgraph"
 
             sampleid="$sample"
-            samplenames="$samplenames $sampleid"
+
+            args="$args -s $sampleid=$bedgraph "
         done
 
-        bedtools multiinter \
-            -i $bedgraphs \
-            -names $samplenames \
-            -empty -g $CHROM_SIZES -header \
-        > $result 
+        if [[ $strand == "neg" ]]; then
+            args="$args --revcomp"
+        fi
+
+        python -m modmap.summary_table \
+            --fasta $FASTA $args --verbose \
+            > $result
+        
     done
 done
