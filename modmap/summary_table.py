@@ -38,7 +38,7 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
     if revcomp:
         strand = 'neg'
 
-    headers = ['#chrom','start','end','strand','seq','count.sum']
+    headers = ['#chrom','start','end','strand','seq','have.signal','count.sum']
     headers.extend(sample_names)
     print '\t'.join(headers)
 
@@ -51,6 +51,7 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
         for interval in els[2:]:
             signals.append(interval.fields[-1])
 
+        have_signal = len([s for s in signals if s > 0])
         count_sum = sum(map(int,signals))
 
         if len(seq) > 1:
@@ -58,13 +59,13 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
             for pos, nuc in izip(range(region.start, region.end), seq):
 
                 fields = [region.chrom, pos, pos + 1,
-                          strand, nuc, count_sum]
+                          strand, nuc, have_signal, count_sum]
                 fields.extend(signals)
                 print '\t'.join(map(str, fields))
 
         else:
             fields = [region.chrom, region.start, region.end,
-                      strand, seq, count_sum]
+                      strand, seq, have_signal, count_sum]
             fields.extend(signals)
 
             print '\t'.join(map(str, fields))
