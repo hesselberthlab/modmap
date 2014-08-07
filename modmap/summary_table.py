@@ -53,12 +53,21 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
 
         count_sum = sum(map(int,signals))
 
-        fields = [region.chrom, region.start, region.end, strand, seq,
-                  count_sum]
-        fields.extend(signals)
+        if len(seq) > 1:
+            # iterate through the sequence so each are mononucs
+            for pos, nuc in izip(range(region.start, region.end), seq):
 
-        print '\t'.join(map(str, fields))
+                fields = [region.chrom, pos, pos + 1,
+                          strand, nuc, count_sum]
+                fields.extend(signals)
+                print '\t'.join(map(str, fields))
 
+        else:
+            fields = [region.chrom, region.start, region.end,
+                      strand, seq, count_sum]
+            fields.extend(signals)
+
+            print '\t'.join(map(str, fields))
 def generate_fasta(intersection_bedtool, fasta_filename, revcomp, verbose):
 
     if verbose:
