@@ -4,9 +4,11 @@
 and report a table
 '''
 
+import ipdb
 import sys
+
 from collections import Counter, defaultdict
-from pyfasta import Fasta, complement
+from pyfaidx import Fasta
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -42,23 +44,28 @@ def calc_nuc_counts(fasta_filename, region_size_min,
 
     fasta = Fasta(fasta_filename)
 
-    for chrom, seq in fasta.items():
+    for chrom in fasta.keys():
 
         # skip data based on specified chromosomes
         if chrom in ignore_chroms: continue
 
         if only_chroms and chrom not in only_chroms: continue
 
-        for idx, pos in enumerate(seq):
+        seq_len = len(fasta[chrom])
+        for idx in range(seq_len + 1):
 
             for region_size in range(region_size_min,
                                      region_size_max + 1):
 
-                nucs = seq[idx:idx+region_size]
-
-                if len(nucs) < region_size: continue
+                nucs = str(fasta[chrom][idx:idx+region_size].seq)
 
                 nuc_counts[region_size][nucs] += 1
+
+    # remove entries that are not equal to region_size
+    for region_size, nuc_dict in nuc_counts.items():
+        for nuc, count in nuc_dict.items():
+            if len(nuc) != region_size:
+                nuc_dict.pop(nuc)
 
     return nuc_counts
 
