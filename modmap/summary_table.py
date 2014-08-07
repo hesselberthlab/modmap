@@ -51,7 +51,7 @@ def summary_table(sample_names, bedgraph_filenames, fasta_filename, revcomp, ver
         for interval in els[2:]:
             signals.append(interval.fields[-1])
 
-        have_signal = len([s for s in signals if s > 0])
+        have_signal = len([s for s in signals if int(s) > 0])
         count_sum = sum(map(int,signals))
 
         if len(seq) > 1:
