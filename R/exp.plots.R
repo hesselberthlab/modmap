@@ -57,9 +57,10 @@ exp.corr.plot <- function(df, sample.name, ... ) {
 
     gp <- gp + geom_point(show_guide = FALSE)
     gp <- gp + geom_smooth(method = "lm") 
-    gp <- gp + facet_grid(operation ~ region.strand + signal.strand,
-                          scales = 'free')
+    gp <- gp + facet_grid(operation ~ region.strand + signal.strand)
 
+    # x = -Inf and y = Inf put the label in the top left, see
+    # https://groups.google.com/forum/#!topic/ggplot2/rFckCiNoU7U
     gp <- gp + geom_text(data = corrs,
                          aes(label = paste("r=", cor, "\n", "p=", pvalue, sep="")),
                          x=-Inf, y=Inf, hjust=0, vjust=1)
