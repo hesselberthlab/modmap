@@ -36,7 +36,7 @@ head(df)
 exp.corr.plot <- function(df, sample.name, ... ) {
 
     # subset data
-    df <- subset(df, region.score > 1 & signal > 1)
+    df <- subset(df, region.score >= 1 & signal >= 1)
 
     # remove outliers
     box.stats <- boxplot.stats(df$region.score)$stats
@@ -48,10 +48,11 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
                    summarise,
-                   cor = signif(cor.test(region.score, signal)$estimate, 5),
-                   pvalue = signif(cor.test(region.score, signal)$p.value, 5))
+                   cor = signif(cor.test(region.score, signal, method = 'pears')$estimate, 3),
+                   pvalue = signif(cor.test(region.score, signal, method = 'pears')$p.value, 4),
+                   count = length(region.name))
 
-    gp <- ggplot(data = df, 
+    gp <- ggplot(data = df,
                  aes(x=log2(region.score),
                      y=log2(signal)))
 
@@ -62,7 +63,9 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     # x = -Inf and y = Inf put the label in the top left, see
     # https://groups.google.com/forum/#!topic/ggplot2/rFckCiNoU7U
     gp <- gp + geom_text(data = corrs,
-                         aes(label = paste("r=", cor, "\n", "p=", pvalue, sep="")),
+                         aes(label = paste("pearson.r=", cor, "\n", 
+                                           "p=", pvalue, "\n",
+                                           "n=", count, sep="")),
                          x=-Inf, y=Inf, hjust=0, vjust=1)
 
     gp <- gp + theme_bw()
