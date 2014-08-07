@@ -51,30 +51,38 @@ for bwt_idx in ${!BOWTIEIDXS[@]}; do
             strand_arg=${strand_args[$strand_idx]}
 
             bedgraph=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bg.gz
+            normbedgraph=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.norm.bg.gz
             tab=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.tab.gz
+            normtab=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.norm.tab.gz
 
-            bedtools genomecov -bg -g $CHROM_SIZES \
-                -ibam $bam $strand_arg -scale $scale_pm \
-                | gzip -c \
-                > $bedgraph
+            if [[ ! -f $bedgraph ]]; then
+                bedtools genomecov -bg -g $CHROM_SIZES \
+                    -ibam $bam $strand_arg \
+                    | gzip -c \
+                    > $bedgraph
+            fi
 
-            bedtools genomecov -dz -g $CHROM_SIZES \
-                -ibam $bam $strand_arg -scale $scale_pm \
-                | gzip -c \
-                > $tab
+            if [[ ! -f $normbedgraph ]]; then
+                bedtools genomecov -bg -g $CHROM_SIZES \
+                    -ibam $bam $strand_arg -scale $scale_pm \
+                    | gzip -c \
+                    > $normbedgraph
+            fi
 
-            # create bigwigs
-            #bigwig=$bgresults/$sample.$index_type.$align_mode.strand.$strand.counts.bw
-            
-            #if [[ $index_type == "virus" ]]; then
-            #    chromsize=$CHROM_SIZES_VIRUS
-            #elif [[ $index_type == "plasmid" ]]; then
-            #    chromsize=$CHROM_SIZES_PLASMID
-            #else
-            #    chromsize=$CHROM_SIZES
-            #fi
+            if [[ ! -f $tab ]]; then
+                bedtools genomecov -dz -g $CHROM_SIZES \
+                    -ibam $bam $strand_arg \
+                    | gzip -c \
+                    > $tab
+            fi
 
-            #bedGraphToBigWig $bedgraph $chromsize $bigwig
+            if [[ ! -f $normtab ]]; then
+                bedtools genomecov -dz -g $CHROM_SIZES \
+                    -ibam $bam $strand_arg -scale $scale_pm \
+                    | gzip -c \
+                    > $normtab
+            fi
+
         done
     done
 done
