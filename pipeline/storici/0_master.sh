@@ -65,7 +65,7 @@ for assembly in ${ASSEMBLIES[@]}; do
 
     # wait until *all* coverage jobs are complete
     bsub -J "summary_table_$ASSEMBLY" \
-        -w "done('coverage_$ASSEMBLY*')" \
+        -w "done(\"coverage_$ASSEMBLY*\")" \
         < $PIPELINE/6_summary_table.sh
 
     bsub -J "plots_$ASSEMBLY$job_array" \
