@@ -1,4 +1,4 @@
-# random_dist.R
+t # random_dist.R
 #
 # __author__ = 'Jay Hesselberth'
 # __contact__ = 'jay.hesselberth@gmail.com'
@@ -49,9 +49,11 @@ ggplot.dist <- functions(df, ...) {
 
     df <- process.observations(df)
 
-    #pvals <- ddply(. ~ chrom,
-    #               summarise,
-    #               pval = signif(t.test(obs, null)$p.value))
+    pvals <- ddply(df, "chrom", 
+                   function(x) {
+                        res <- t.test(obs ~ null, data = x)
+                        with(res, data.frame(statistic, p.value))
+                   })
 
     gp <- ggplot(data = df, 
                  fill = factor(dist))
@@ -64,10 +66,10 @@ ggplot.dist <- functions(df, ...) {
 
     gp <- scale_fill_brewer(palette="Set1")
 
-    #gp <- geom_text(data = pvals, 
-    #                aes(label = paste("P(t.test)=", pval, sep=''),
-    #                    x = -Inf, y = Inf,
-    #                    hjust = 0, vjust = 0))
+    gp <- geom_text(data = pvals, 
+                    aes(label = paste("P(t.test)=", p.value, sep=''),
+                        x = -Inf, y = Inf,
+                        hjust = 0, vjust = 0))
 
     gp <- gp + xlab('Bin') + ylab('Count')
 
