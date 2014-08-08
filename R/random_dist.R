@@ -8,6 +8,25 @@
 
 library(ggplot2)
 library(Cairo)
+library(plyr)
+
+output = commandArgs(trailingOnly=TRUE)
+if (length(output) != 3) {
+   stop("usage: Rscript random_dist.R infile sample.name output.dir")
+}
+
+infile = output[1]
+sample.name = output[2]
+output.dir = output[3]
+
+COLNAMES <- c('obs', 'chrom')
+
+df <- read.table(infile, col.names=COLNAMES)
+if (nrow(df) == 0) {
+    warning("empty data frame")
+    quit(status=0)
+}
+head(df)
 
 # generate observations from poisson using observed data
 
@@ -23,15 +42,16 @@ process.observations <- function(df) {
     combined.df <- data.frame(null.vals,
                           rep('pois'))
 
-    result <- t.test(obs.vals, null.vals)
-    pval <- result$p.value
-
-    return(combined.df, pval)
+    return(combined.df)
 }
 
 ggplot.dist <- functions(df, ...) {
 
-    df, pval <- process.observations(df)
+    df <- process.observations(df)
+
+    #pvals <- ddply(. ~ chrom,
+    #               summarise,
+    #               pval = signif(t.test(obs, null)$p.value))
 
     gp <- ggplot(data = df, 
                  fill = factor(dist))
@@ -51,15 +71,13 @@ ggplot.dist <- functions(df, ...) {
 
     gp <- gp + xlab('Bin') + ylab('Count')
 
-    title.top = paste('modmap distribution \n(sample ',
+    title = paste('modmap distribution \n(sample ',
                       sample.name, sep='')
 
-    title = paste(title.top, title.bottom, sep='\n')
     gp <- gp + ggtitle(title)
 
     return(gp)
 }                       
-
 
 gp.dist <- ggplot.dist(df)
 
