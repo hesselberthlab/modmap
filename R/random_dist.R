@@ -78,6 +78,8 @@ ggplot.dist <- functions(df, ...) {
 
     gp <- gp + ggtitle(title)
 
+    gp <- gp + theme_bw()
+
     return(gp)
 }                       
 
