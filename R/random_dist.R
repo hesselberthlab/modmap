@@ -17,6 +17,7 @@ process.observations <- function(df) {
     obs.lambda <- mean(obs.vals)
     num.obs <- length(obs.vals)
 
+    # generate null distribution based on observed values
     null.vals <- rpois(num.obs, obs.lambda)
 
     combined.df <- data.frame(null.vals,
@@ -43,6 +44,11 @@ ggplot.dist <- functions(df, ...) {
 
     gp <- scale_fill_brewer(palette="Set1")
 
+    #gp <- geom_text(data = pvals, 
+    #                aes(label = paste("P(t.test)=", pval, sep=''),
+    #                    x = -Inf, y = Inf,
+    #                    hjust = 0, vjust = 0))
+
     gp <- gp + xlab('Bin') + ylab('Count')
 
     title.top = paste('modmap distribution \n(sample ',
@@ -50,7 +56,6 @@ ggplot.dist <- functions(df, ...) {
 
     title = paste(title.top, title.bottom, sep='\n')
     gp <- gp + ggtitle(title)
-
 
     return(gp)
 }                       
