@@ -42,7 +42,7 @@ def calc_nuc_counts(fasta_filename, region_size_min,
 
     nuc_counts = defaultdict(Counter)
 
-    fasta = Fasta(fasta_filename)
+    fasta = Fasta(fasta_filename, as_raw=True)
 
     for chrom in fasta.keys():
 
@@ -57,7 +57,7 @@ def calc_nuc_counts(fasta_filename, region_size_min,
             for region_size in range(region_size_min,
                                      region_size_max + 1):
 
-                nucs = str(fasta[chrom][idx:idx+region_size].seq)
+                nucs = fasta[chrom][idx:idx+region_size]
 
                 nuc_counts[region_size][nucs] += 1
 
