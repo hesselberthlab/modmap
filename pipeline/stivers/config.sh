@@ -20,11 +20,13 @@ ALIGN_ARGS=("-m 1" "--all")
 
 BOWTIEIDXS=($HOME/ref/genomes/hg19/hg19
             $DATA/index/NL4-3-integrant
-            $DATA/index/NL4-3_replication_competent_no_GFP)
-BOWTIEIDX_TYPES=("hg19" "virus" "plasmid")
+            $DATA/index/NL4-3_replication_competent_no_GFP
+            $DATA/index/UGI)
+BOWTIEIDX_TYPES=("hg19" "virus" "plasmid" "UGI")
 
 CHROM_SIZES=$HOME/ref/genomes/hg19/hg19.chrom.sizes
 CHROM_SIZES_VIRUS=$DATA/index/NL4-3-integrant.chrom.sizes
 CHROM_SIZES_PLASMID=$DATA/index/NL4-3_replication_competent_no_GFP.chrom.sizes
+CHROM_SIZES_UGI=$DATA/index/UGI.chrom.sizes
 
 METADATA=$DOC/metadata.tsv
