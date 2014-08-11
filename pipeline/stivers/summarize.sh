@@ -36,21 +36,21 @@ for sample in ${samples[@]}; do
     fi
 
     if [[ $samplenum -eq 33 || $samplenum -eq 41 || $samplenum -eq 49 ]]; then
-        expname="-RTX -VIRUS"
+        expname="1:-V"
     elif [[ $samplenum -eq 34 || $samplenum -eq 42 || $samplenum -eq 50 ]]; then
-        expname="+RTX -VIRUS"
+        expname="2:RTX -V"
     elif [[ $samplenum -eq 35 || $samplenum -eq 43 || $samplenum -eq 51 ]]; then
-        expname="-RTX +VIRUS (WT)"
+        expname="3:V-WT"
     elif [[ $samplenum -eq 36 || $samplenum -eq 44 || $samplenum -eq 52 ]]; then
-        expname="+RTX +VIRUS (WT)"
+        expname="4:RTX V-WT"
     elif [[ $samplenum -eq 37 || $samplenum -eq 45 || $samplenum -eq 53 ]]; then
-        expname="-RTX +VIRUS (D64E)"
+        expname="5:V-D64E"
     elif [[ $samplenum -eq 38 || $samplenum -eq 46 || $samplenum -eq 54 ]]; then
-        expname="+RTX +VIRUS (D64E)"
+        expname="6:RTX V-D64E"
     elif [[ $samplenum -eq 39 || $samplenum -eq 47 || $samplenum -eq 55 ]]; then
-        expname="-RTX +RAL +VIRUS "
+        expname="7:RAL V-WT"
     elif [[ $samplenum -eq 40 || $samplenum -eq 48 || $samplenum -eq 56 ]]; then
-        expname="+RTX +RAL +VIRUS "
+        expname="8:RTX RAL V-WT"
     fi
 
     bgresults=$RESULT/$sample/bedgraphs
