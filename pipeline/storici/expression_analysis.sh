@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-#BSUB -J exp.analysis[1-10]
+#BSUB -J exp.analysis[1-13]
 #BSUB -e exp.analysis.%J.%I.err
 #BSUB -o exp.anlaysis.%J.%I.out
 #BSUB -q normal

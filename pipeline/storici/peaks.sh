@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-#BSUB -J peaks[1-10]
+#BSUB -J peaks[1-13]
 #BSUB -e peaks.%J.%I.err
 #BSUB -o peaks.%J.%I.out
 #BSUB -q short
