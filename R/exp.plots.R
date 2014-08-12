@@ -50,7 +50,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
                    summarise,
                    cor = signif(cor.test(region.score, signal, method = 'pears')$estimate, 3),
                    pvalue = signif(cor.test(region.score, signal, method = 'pears')$p.value, 4),
-                   n.regions = length(signal),
+                   num.regions = length(signal),
                    signal.sum = sum(signal))
 
     gp <- ggplot(data = df,
@@ -66,7 +66,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
     gp <- gp + geom_text(data = corrs,
                          aes(label = paste("pearson.r=", cor, "\n", 
                                            "p=", pvalue, "\n",
-                                           "n.regions=", count, "\n",
+                                           "n.regions=", num.regions, "\n",
                                            "sum=", signal.sum, sep="")),
                          x=-Inf, y=Inf, hjust=0, vjust=1)
 
