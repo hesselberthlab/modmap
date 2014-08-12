@@ -5,14 +5,13 @@ sites.
 '''
 
 import sys
-import pdb
 
 from operator import itemgetter
 from itertools import izip
 from collections import Counter, defaultdict
 
 from toolshed import reader
-from pyfasta import Fasta, complement
+from pyfaidx import Fasta, complement
 
 from .common import load_coverage
 
@@ -58,7 +57,7 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
         msg += ">> revcomp strand: %s\n" % str(revcomp_strand)
         print >>sys.stderr, msg
 
-    seq_fasta = Fasta(fasta_filename)
+    seq_fasta = Fasta(fasta_filename, as_raw = True)
 
     nuc_counts = defaultdict(Counter)
 
@@ -106,9 +105,6 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
                         # negative strand
                         end = start + region_size
 
-                # XXX: does this ever happen?
-                if start < 0: continue
-
                 nucs = seq_fasta[row.chrom][start:end]
 
                 #  1. libs where the captured strand is sequenced
@@ -122,9 +118,13 @@ def calc_nuc_counts(pos_signal_bedtool, neg_signal_bedtool, fasta_filename,
                    (strand == '-' and not revcomp_strand):
                     nucs = complement(nucs[::-1])
 
-                if len(nucs.strip()) != region_size: continue
-
                 nuc_counts[offset][nucs] += row.count
+
+    # remove nucs that are not len region_size
+    for offset, counts in nuc_counts.items():
+        for nuc, count in counts.items():
+            if len(nuc.strip()) != region_size:
+                counts.pop(nuc)
 
     return total_sites, nuc_counts
 
