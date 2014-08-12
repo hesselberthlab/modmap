@@ -38,6 +38,9 @@ fi
 # need to be in BIN to run module
 cd $BIN
 
+offset_min=-50
+offset_max=50
+
 for aln_idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$aln_idx]}
     BAM=$aligndir/$sample.align.$align_mode.bam
@@ -69,6 +72,8 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
                 $ignore_arg \
                 --revcomp-strand \
                 --background-freq-table $BKGD_FREQS \
+                --offset-min $offset_min \
+                --offset-max $offset_max \
                 --verbose \
                 >> $output
         done
