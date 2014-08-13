@@ -1,9 +1,0 @@
-1)  What are the rNMPs (rG, rC, rA, rU) and their relative percentage.
-2)  What are the flanking sequences to rNMPs: N-rNMP-N and NN-rNMP-NN, …. is there a particular sequence signature for rNMP incorporation.
-3)  Where are rNMP located on the yeast genome and chromosomes. Are these random, or concentrated in some chromosomes, telomeres, centromere… Are rNMPs in clusters. Are there hot spots.
-4)  Location of rNMPs relative to autonomous replicating sequences (ARSs). Are they close to ARSs. Is there a bias in rNMP distribution next to early or late firing ARSs.
-5)  Are rNMPs more abundant on the leading strands (suggesting rNMP incorporation by the leading strand polymerase epsilon, which has been reported to incorporate more rNMPs than the Pol delta lagging strand polymerase).
-6)  Any strand bias distribution, independent from leading and lagging strand.
-7)  Are rNMPs more abundant in transcribed regions.
-8)  Are rNMPs more abundant in promoter regions.
-9)  Develop a map of all rNMPs found.
