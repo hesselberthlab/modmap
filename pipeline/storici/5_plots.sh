@@ -29,7 +29,6 @@ else
 fi
 
 # for nuc freq plots
-offset_mins=(-100 -50 -15)
 offset_maxs=(100 50 15)
 
 for aln_idx in ${!ALIGN_MODES[@]}; do
@@ -69,18 +68,14 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
             mkdir -p $subplotdir
         fi
 
-        for offset_idx in ${!offset_mins[@]}; do
+        for offset_max in ${offset_maxs[@]}; do
             
-            offset_min=${offset_mins[$offset_idx]}
-            offset_max=${offset_maxs[$offset_idx]}
-
             counts="$results/nuc_freqs/$sample.align.$align_mode.ignore.$ignore_mode.nuc_freqs.tab"
             sampleid="$sample.align-$align_mode.subset-$ignore_mode"
 
             Rscript $RSCRIPTS/nuc.freqs.R \
                 -n "$sampleid" \
                 -d $subplotdir \
-                --offsetmin "\\$offset_min" \
                 --offsetmax $offset_max \
                 $counts
         done
