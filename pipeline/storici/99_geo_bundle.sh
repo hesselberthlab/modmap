@@ -5,6 +5,9 @@
 #BSUB -o geo.bundle.%J.%I.out
 #BSUB -P storici
 
+<<DOC
+Copy fastq and bedgraph files into tar archive for GEO submission.
+DOC
 source $CONFIG
 
 bundle_dir=$RESULT/geo_submission
@@ -14,7 +17,7 @@ if [[ ! -d $bundle_dir ]]; then
     mkdir -p $bundle_dir/bedgraphs
 fi
 
-bundle_file=$bundle_dir/storici-geo-submission.tar.gz
+bundle_file=$bundle_dir/storici-geo-submission-$ASSEMBLY.tar.gz
 
 # running list of tarfiles
 for sample in ${SAMPLES[@]}; do

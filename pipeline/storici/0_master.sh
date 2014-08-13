@@ -46,6 +46,11 @@ for assembly in ${ASSEMBLIES[@]}; do
         -w "done(\"coverage_$ASSEMBLY*\")" \
         < $PIPELINE/6_summary_table.sh
 
+    bsub -J "geo_bundle_$ASSEMBLY" 
+        -w "done(\"align_$ASSEMBLY*\") &&
+            done(\"coverage_$ASSEMBLY*\")" \
+        < $PIPELINE/99_geo_bundle.sh
+
     # 1 job for each of 3 assemblies
     bsub -J "bkgd_freqs_$ASSEMBLY" \
         < $PIPELINE/background_nuc_freqs.sh
