@@ -8,6 +8,7 @@
 <<DOC
 Copy fastq and bedgraph files into tar archive for GEO submission.
 DOC
+
 source $CONFIG
 
 bundle_dir=$RESULT/geo_submission
