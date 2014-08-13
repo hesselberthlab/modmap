@@ -9,16 +9,31 @@
 library(ggplot2)
 library(RColorBrewer)
 library(Cairo)
+library(optparse)
 
-# get the filename
-output = commandArgs(trailingOnly=TRUE)
-if (length(output) != 3) {
-   stop("usage: Rscript nuc.freq.R infile sample.name output.dir")
-}
+option_list <- list(
+    make_option(c("-n", "--name"), action="store", 
+                default="", help="sample name"),
+    make_option(c("-d", "--directory"), action="store",
+                default=".", help="output directory [default %default]"),
+    make_option(c("--offsetmin"), action="store",
+                default="-15", help="offset min [default %default]"),
+    make_option(c("--offsetmax"), action="store",
+                default="15", help="offset max [default %default]"))
 
-infile = output[1]
-sample.name = output[2]
-output.dir = output[3]
+parser <- OptionParser(usage="%prog [options] infile",
+                       option_list=option_list)
+
+arguments <- parse_args(parser, positional_arguments = 1)
+
+opt <- arguments$options
+infile <- arguments$args
+
+sample.name <- opt$name
+output.dir <- opt$directory
+
+offset.min <- opt$offsetmin
+offset.max <- opt$offsetmax
 
 COLNAMES <- c('nuc','offset','region.size','count',
               'freq','type','total.sites')
@@ -34,7 +49,7 @@ head(df)
 # http://novyden.blogspot.com/2013/09/how-to-expand-color-palette-with-ggplot.html
 getPalette = colorRampPalette(brewer.pal(9, "Set1"))
 
-ggplot.nuc.freq <- function(df, cur.size, ... ) {
+ggplot.nuc.freq <- function(df, cur.size, offset.min, offset.max, ... ) {
 
     # subset the data
     df <- subset(df, region.size == cur.size)
@@ -72,6 +87,7 @@ ggplot.nuc.freq <- function(df, cur.size, ... ) {
                                                nrow = 1))
     }
 
+    gp <- gp + xlim(offset.min, offset.max)
 
     # axis labels 
     gp <- gp + xlab('Position')
@@ -95,11 +111,14 @@ for (idx in 1:length(uniq.sizes)) {
 
     cur.size <- uniq.sizes[idx]
 
-    gp.nuc.freq <- ggplot.nuc.freq(df, cur.size)
+    gp.nuc.freq <- ggplot.nuc.freq(df, cur.size, offset.min, offset.max)
 
     # write the file
     pdf.filename <- paste(output.dir, '/', 'modmap.nuc.freq.region.',
-                          cur.size, '.', sample.name, '.pdf', sep='')
+                          cur.size, '.', 
+                          "min.", offset.min, ".", 
+                          "max.", offset.max,
+                          ".", sample.name, '.pdf', sep='')
 
     ggsave(filename = pdf.filename, plot = gp.nuc.freq,
            height = 8.5, width = 11,
