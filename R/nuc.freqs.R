@@ -16,8 +16,6 @@ option_list <- list(
                 default="", help="sample name"),
     make_option(c("-d", "--directory"), action="store",
                 default=".", help="output directory [default %default]"),
-    make_option(c("--offsetmin"), action="store",
-                default="-15", help="offset min [default %default]"),
     make_option(c("--offsetmax"), action="store",
                 default="15", help="offset max [default %default]"))
 
@@ -32,8 +30,8 @@ infile <- arguments$args
 sample.name <- opt$name
 output.dir <- opt$directory
 
-offset.min <- opt$offsetmin
-offset.max <- opt$offsetmax
+offset.max <- as.integer(opt$offsetmax)
+offset.min <- as.integer(offset.max) * -1
 
 COLNAMES <- c('nuc','offset','region.size','count',
               'freq','type','total.sites')
