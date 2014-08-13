@@ -38,8 +38,8 @@ fi
 # need to be in BIN to run module
 cd $BIN
 
-offset_min=-50
-offset_max=50
+offset_min=-100
+offset_max=100
 
 for aln_idx in ${!ALIGN_MODES[@]}; do
     align_mode=${ALIGN_MODES[$aln_idx]}
