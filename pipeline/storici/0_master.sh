@@ -33,19 +33,10 @@ for assembly in ${ASSEMBLIES[@]}; do
     
     job_array="[1-$NUM_SAMPLES]"
 
-    # 1 job for each of 3 assemblies
-    bsub -J "bkgd_freqs_$ASSEMBLY" \
-        < $PIPELINE/background_nuc_freqs.sh
-
     # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
 
-    bsub -J "peaks_$ASSEMBLY$job_array" \
-        -w "done('align_$ASSEMBLY[*]')" \
-        < $PIPELINE/peaks.sh
-
-    # jobs are dependent among individual job indices
     bsub -J "coverage_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/2_coverage.sh 
@@ -54,6 +45,10 @@ for assembly in ${ASSEMBLIES[@]}; do
     bsub -J "summary_table_$ASSEMBLY" \
         -w "done(\"coverage_$ASSEMBLY*\")" \
         < $PIPELINE/6_summary_table.sh
+
+    # 1 job for each of 3 assemblies
+    bsub -J "bkgd_freqs_$ASSEMBLY" \
+        < $PIPELINE/background_nuc_freqs.sh
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]') && \
