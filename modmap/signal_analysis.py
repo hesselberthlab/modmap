@@ -64,18 +64,27 @@ def calc_signals(bam_filename, region_bed_filename, signal_colnum,
                                              c=signal_colnum, null=0)
 
             for region_row, signal_row in izip(region_bedtool, map_bedtool):
-    
-                region_name = region_row[3]
-                region_score = region_row[4]
+   
+                try:
+                    region_name = region_row[3]
+                    region_score = region_row[4]
+                    region_strand = region_row[5]
 
-                region_strand = region_row[5]
+                except IndexError:
+                    region_name = '%s-%s-%d-%d' % (region_type,
+                                                   region_row.chrom,
+                                                   region_row.start,
+                                                   region_row.end)
+                    region_score = 0
+                    region_strand = 'none'
 
                 if region_strand == '+':
                     region_strand = 'pos'
-                else:
+                elif region_strand == '-':
                     region_strand = 'neg'
 
-                signal = float(signal_row[6])
+                # last field is the calculated signal
+                signal = float(signal_row[-1])
 
                 if normalize and signal != 0:
                     region_size = float(region_row.end - region_row.start)
