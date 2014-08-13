@@ -20,24 +20,27 @@ __version__ = '0.1'
 def signal_analysis(bam_filename, region_bed_filename,
                     chrom_sizes_filename,
                     pos_strand_label, neg_strand_label,
-                    signal_colnum, normalize, verbose):
+                    signal_colnum, region_type, 
+                    normalize, verbose):
 
     # region_bed_filename has FPKM as score
     signals = calc_signals(bam_filename,
                            region_bed_filename,
                            signal_colnum,
+                           region_type,
                            normalize,
                            verbose)
 
     header_fields = ('#region.name','region.score','region.strand',
-                     'signal.strand','operation','signal', 'signal.type')
+                     'region.type', 'signal.strand','operation',
+                     'signal', 'signal.type')
     print '\t'.join(header_fields)
 
     for fields in signals:
         print '\t'.join(map(str, fields))
 
 def calc_signals(bam_filename, region_bed_filename, signal_colnum,
-                 normalize, verbose):
+                 region_type, normalize, verbose):
 
     ''' generator to calculate signals from BED regions mapped onto positive and
     negative strand data.'''
@@ -79,7 +82,7 @@ def calc_signals(bam_filename, region_bed_filename, signal_colnum,
                     signal = signal / region_size
 
                 result = (region_name, region_score, region_strand,
-                          signal_strand, oper, signal, signal_type)
+                          region_type, signal_strand, oper, signal, signal_type)
 
                 yield result
 
@@ -105,6 +108,9 @@ def parse_options(args):
     group.add_option("--neg-strand-label", action="store", type='str',
         default='neg', help="alternate neg strand label (default: %default)")
 
+    group.add_option("--region-type", action="store", type='str',
+        default='generic', help="region type (default: %default)")
+
     group.add_option("--normalize", action="store_true",
         default=False, help="normalize signal to region length (default: %default)")
 
@@ -126,6 +132,7 @@ def main(args=sys.argv[1:]):
     kwargs = {'pos_strand_label':options.pos_strand_label,
               'neg_strand_label':options.neg_strand_label,
               'signal_colnum':options.signal_colnum,
+              'region_type':options.region_type,
               'normalize':options.normalize,
               'verbose':options.verbose}
 
