@@ -13,7 +13,6 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 source $CONFIG
-cd $BIN
 
 results=$RESULT/library_stats
 if [[ ! -d $results ]]; then
@@ -34,8 +33,15 @@ for align_mode in ${ALIGN_MODES[@]}; do
 
         sampleid="$sample"
 
-        cat $posbedgraph $negbedgraph \
-            | awk '{SUM += $4} END {print SUM}'
+        total_reads=$(cat $posbedgraph $negbedgraph \
+                        | awk '{SUM += $4} END {print SUM}')
+
+        norm_reads=$(echo "$total_reads / $genomesize" | bc -l)
+
+        echo -e "$sample\t$total_reads\traw" \
+            > $result
+        echo -e "$sample\t$norm_reads\tnorm" \
+            > $result
     done
 
 done
