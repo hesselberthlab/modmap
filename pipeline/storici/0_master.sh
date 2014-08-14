@@ -44,37 +44,41 @@ for assembly in ${ASSEMBLIES[@]}; do
     # wait until *all* coverage jobs are complete
     bsub -J "summary_table_$ASSEMBLY" \
         -w "done(\"coverage_$ASSEMBLY*\")" \
-        < $PIPELINE/6_summary_table.sh
+        < $PIPELINE/3_summary_table.sh
 
-    bsub -J "geo_bundle_$ASSEMBLY" 
-        -w "done(\"align_$ASSEMBLY*\") &&
+    bsub -J "geo_bundle_$ASSEMBLY"  \
+        -w "done(\"align_$ASSEMBLY*\") && \
             done(\"coverage_$ASSEMBLY*\")" \
         < $PIPELINE/99_geo_bundle.sh
 
     # 1 job for each of 3 assemblies
     bsub -J "bkgd_freqs_$ASSEMBLY" \
-        < $PIPELINE/background_nuc_freqs.sh
+        < $PIPELINE/4_background_nuc_freqs.sh
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]') && \
             done('bkgd_freqs_$ASSEMBLY')" \
-        < $PIPELINE/3_nuc_freqs.sh
+        < $PIPELINE/5_nuc_freqs.sh
 
     bsub -J "origin_anal_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
-        < $PIPELINE/4_origin_analysis.sh
+        < $PIPELINE/6_origin_analysis.sh
 
     bsub -J "exp_anal_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
-        < $PIPELINE/expression_analysis.sh
+        < $PIPELINE/7_expression_analysis.sh
+
+    bsub -J "txn_anal_$ASSEMBLY$job_array" \
+        -w "done('align_$ASSEMBLY[*]')" \
+        < $PIPELINE/99_transcribed_analysis.sh
 
     bsub -J "plots_$ASSEMBLY$job_array" \
         -w "done('origin_anal_$ASSEMBLY[*]') && \
             done('nuc_freqs_$ASSEMBLY[*]') && \
             done('exp_anal_$ASSEMBLY[*]')" \
-        < $PIPELINE/5_plots.sh
+        < $PIPELINE/8_plots.sh
 
     bsub -J "tracklines_$ASSEMBLY" \
-        < $PIPELINE/tracklines.sh
+        < $PIPELINE/99_tracklines.sh
 
 done
