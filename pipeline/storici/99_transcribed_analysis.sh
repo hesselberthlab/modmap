@@ -34,8 +34,8 @@ region_types=('transcribed-nuc' 'not-transcribed-nuc'
               
 region_filenames=("$DATA/$ASSEMBLY/sgdGenes.nuc.bed"
                   "$DATA/$ASSEMBLY/sgdGenes.complement.nuc.bed"
-                  "$DATA/$ASSEMBLY/sgdGenes.nuc.mito.bed"
-                  "$DATA/$ASSEMBLY/sgdGenes.complement.nuc.mito.bed")
+                  "$DATA/$ASSEMBLY/sgdGenes.mito.bed"
+                  "$DATA/$ASSEMBLY/sgdGenes.complement.mito.bed")
 
 # XXX need to run module out of bin directory
 cd $BIN
