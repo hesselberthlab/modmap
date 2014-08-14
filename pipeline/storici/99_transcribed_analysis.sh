@@ -7,20 +7,20 @@
 #BSUB -P storici
 
 <<DOC
-origin analysis
+transcription analysis
 DOC
 
 set -o nounset -o pipefail -o errexit -x
 
 # XXX testing
-CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
-source $CONFIG
-ASSEMBLY=sacCer2
-RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
-CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-LSB_JOBINDEX=1
+#CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
+#ASSEMBLY=sacCer2
+#RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
+#CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
+#LSB_JOBINDEX=1
 # XXX
 
+source $CONFIG
 sample=${SAMPLES[$(($LSB_JOBINDEX - 1))]}
 
 # output directory
@@ -29,17 +29,13 @@ if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
 
-region_types=('transcribed' 'not-transcribed')
-region_filenames=("$DATA/$ASSEMBLY/sgdGene.bed"
-                  "$DATA/$ASSEMBLY/sgdGene.complement.bed")
-
-# make complement bed if required
-bedfile=${region_filenames[0]}
-complementbed=${region_filenames[1]}
-if [[ ! -f $complementbed ]]; then
-    bedtools complement -i $bedfile -g $CHROM_SIZES \
-        > $complementbed 
-fi
+region_types=('transcribed-nuc' 'not-transcribed-nuc'
+              'transcribed-mito' 'not-transcribed-mito')
+              
+region_filenames=("$DATA/$ASSEMBLY/sgdGenes.nuc.bed"
+                  "$DATA/$ASSEMBLY/sgdGenes.complement.nuc.bed"
+                  "$DATA/$ASSEMBLY/sgdGenes.nuc.mito.bed"
+                  "$DATA/$ASSEMBLY/sgdGenes.complement.nuc.mito.bed")
 
 # XXX need to run module out of bin directory
 cd $BIN
@@ -51,9 +47,6 @@ for align_mode in ${ALIGN_MODES[@]}; do
     BAM=$aligndir/$sample.align.$align_mode.bam
 
     result_tab="$results/txn_analysis.align.$align_mode.tab"
-
-    # delete old results if exists - going to loop and append so need a
-    # fresh empty file
     if [[ -f $result_tab ]]; then
         rm -f $result_tab
     fi
