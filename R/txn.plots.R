@@ -45,7 +45,7 @@ txn.box.plot <- function(df, sample.name, ... ) {
     
     stats <- ddply(df, operation ~ compartment,
                    function (x) {
-                   t <- t.test(signal ~ region, data = x)
+                   t <- wilcox.test(signal ~ region, data = x)
                    with(t, data.frame(statistic, p.value))})
     
     gp <- ggplot(data = df,
@@ -59,7 +59,7 @@ txn.box.plot <- function(df, sample.name, ... ) {
     gp <- gp + theme_bw()
 
     gp <- gp + geom_text(data = stats,
-                         aes(label = paste("t.test stat=", signif(statistic,5), "\n", 
+                         aes(label = paste("wilcox.test stat=", signif(statistic,5), "\n", 
                                            "p=", signif(p.value,5), "\n", sep=''),
                          x=-Inf, y=Inf, hjust=0, vjust=1))
     
