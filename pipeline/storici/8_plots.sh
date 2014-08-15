@@ -58,15 +58,25 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         Rscript $RSCRIPTS/exp.plots.R $counts "$sampleid" $subplotdir
     done
 
+    # --- transcription plots --------------------------------------
+    subplotdir="$plotdir/transcription_analysis"
+    if [[ ! -d $subplotdir ]]; then
+        mkdir -p $subplotdir
+    fi
+
+    counts="$results/transcription_analysis/txn_analysis.align.$align_mode.tab"
+    sampleid="$sample.align-$align_mode"
+    Rscript $RSCRIPTS/txn.plots.R $counts "$sampleid" $subplotdir
+
+    # --- nuc_freq plots ------------------------------------
+    subplotdir="$plotdir/nuc_freqs"
+    if [[ ! -d $subplotdir ]]; then
+        mkdir -p $subplotdir
+    fi
+
     for ig_idx in ${!ignore_modes[@]}; do
 
         ignore_mode=${ignore_modes[$ig_idx]}
-
-        # --- nuc_freq plots ------------------------------------
-        subplotdir="$plotdir/nuc_freqs"
-        if [[ ! -d $subplotdir ]]; then
-            mkdir -p $subplotdir
-        fi
 
         for offset_max in ${offset_maxs[@]}; do
             
