@@ -54,14 +54,7 @@ txn.box.plot <- function(df, sample.name, ... ) {
 
     gp <- gp + geom_boxplot(aes(fill = factor(region)))
     gp <- gp + scale_fill_brewer(palette="Set1", guide=FALSE)
-    
-    median.val <- log10(mean(df$signal[df$signal > 0]))
-    labeler <- function(x) {
-      return(c(y = median.val, label = length(x)))
-    }
-    
-    gp <- gp + stat_summary(fun.data = labeler, geom = "text")
-                            
+          
     gp <- gp + facet_grid(operation ~ compartment)
     gp <- gp + theme_bw()
 
@@ -69,6 +62,14 @@ txn.box.plot <- function(df, sample.name, ... ) {
                          aes(label = paste("t.test stat=", signif(statistic,5), "\n", 
                                            "p=", signif(p.value,5), "\n", sep=''),
                          x=-Inf, y=Inf, hjust=0, vjust=1))
+    
+    median.val <- log10(mean(df$signal[df$signal > 0]))
+    labeler <- function(x) {
+      return(c(y = median.val, label = length(x)))
+    }
+    
+    gp <- gp + stat_summary(fun.data = labeler, geom = "text")
+    
     # axis labels 
     gp <- gp + ylab('log10(rNMP / bp)')
     gp <- gp + xlab('')
