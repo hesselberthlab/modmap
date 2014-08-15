@@ -29,8 +29,8 @@ if [[ ! -d $results ]]; then
     mkdir -p $results
 fi
 
-region_types=('transcribed-nuc' 'not-transcribed-nuc'
-              'transcribed-mito' 'not-transcribed-mito')
+region_types=('nuc-genic' 'nuc-intergenic'
+              'mito-genic' 'mito-intergenic')
               
 region_filenames=("$DATA/$ASSEMBLY/sgdGenes.nuc.bed"
                   "$DATA/$ASSEMBLY/sgdGenes.complement.nuc.bed"
