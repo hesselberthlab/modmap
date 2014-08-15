@@ -20,20 +20,23 @@ fi
 
 bundle_file=$bundle_dir/storici-geo-submission-$ASSEMBLY.tar.gz
 
-# running list of tarfiles
-for sample in ${SAMPLES[@]}; do
-    fastq=$DATA/$sample.fq.gz
-    posbg=$bgresults/$sample.align.all.strand.pos.counts.bg
-    negbg=$bgresults/$sample.align.all.strand.neg.counts.bg
+if [[ ! -f $bundle_file ]]; then
 
-    cp $fastq $bundle_dir/fastq
-    cp $posbg $bundle_dir/bedgraphs
-    cp $negbg $bundle_dir/bedgraphs
-done
+    # running list of tarfiles
+    for sample in ${SAMPLES[@]}; do
+        fastq=$DATA/$sample.fq.gz
+        posbg=$bgresults/$sample.align.all.strand.pos.counts.bg
+        negbg=$bgresults/$sample.align.all.strand.neg.counts.bg
 
-# gzip bedgraphs
-for bgfile in $bundle_dir/bedgraphs; do
-    gzip $bgfile
-done
+        cp $fastq $bundle_dir/fastq
+        cp $posbg $bundle_dir/bedgraphs
+        cp $negbg $bundle_dir/bedgraphs
+    done
 
-tar zvcf $bundle_file $bundle_dir
+    # gzip bedgraphs
+    for bgfile in $bundle_dir/bedgraphs; do
+        gzip $bgfile
+    done
+
+    tar zvcf $bundle_file $bundle_dir
+fi
