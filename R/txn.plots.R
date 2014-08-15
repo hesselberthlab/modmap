@@ -59,7 +59,10 @@ txn.box.plot <- function(df, sample.name, ... ) {
       return(c(y = mean(x), label = length(x)))
     }
     
-    gp <- gp + geom_boxplot() 
+    gp <- gp + geom_boxplot(aes(fill = factor(region)))
+    gp <- gp + scale_fill_brewer(palette="Set1", guide=FALSE)
+    gp <- 
+    
     gp <- gp + stat_summary(fun.data = labeler, geom = "text")
     gp <- gp + facet_grid(. ~ compartment)
     gp <- gp + theme_bw()
