@@ -32,10 +32,10 @@ fi
 region_types=('nuc-genic' 'nuc-intergenic'
               'mito-genic' 'mito-intergenic')
               
-region_filenames=("$DATA/$ASSEMBLY/transcribed_regions/sgdGenes.nuc.bed"
-                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGenes.complement.nuc.bed"
-                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGenes.mito.bed"
-                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGenes.complement.mito.bed")
+region_filenames=("$DATA/$ASSEMBLY/transcribed_regions/sgdGene.nuc.bed"
+                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGene.complement.nuc.bed"
+                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGene.mito.bed"
+                  "$DATA/$ASSEMBLY/transcribed_regions/sgdGene.complement.mito.bed")
 
 # XXX need to run module out of bin directory
 cd $BIN
