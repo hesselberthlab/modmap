@@ -12,14 +12,6 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
-# XXX testing
-CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
-DEBUG="-debug"
-ASSEMBLY=sacCer2
-RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
-CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-# XXX
-
 source $CONFIG
 
 # output directory
