@@ -42,7 +42,8 @@ txn.box.plot <- function(df, sample.name, ... ) {
     region <- sapply(as.character(df$region.type), 
                      function (x) strsplit(x, '-')[[1]][2])
     df$region <- region
-    
+   
+    # calculate t.tests among groups
     stats <- ddply(df, operation ~ compartment,
                    function (x) {
                    t <- t.test(signal ~ region, data = x)
@@ -62,10 +63,13 @@ txn.box.plot <- function(df, sample.name, ... ) {
                          aes(label = paste("t.test stat=", signif(statistic,5), "\n", 
                                            "p=", signif(p.value,5), "\n", sep=''),
                          x=-Inf, y=Inf, hjust=0, vjust=1))
-    
-    median.val <- log10(mean(df$signal[df$signal > 0]))
+   
+    # XXX val is log10 to be placed correctly on y-axis
+    text.pos <- log10(mean(df$signal[df$signal > 0]))
+
+    # XXX label num is divided by 2 to account for number of facets
     labeler <- function(x) {
-      return(c(y = median.val, label = length(x)))
+      return(c(y = text.pos, label = length(x) / 2))
     }
     
     gp <- gp + stat_summary(fun.data = labeler, geom = "text")
