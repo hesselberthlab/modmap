@@ -56,11 +56,11 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
         fi
 
         if [[ $ignore_mode == "only-mito" ]]; then
-            BKGD_FREQS="$RESULT/$ASSEMBLY.chrM.nuc.freqs.tab"
+            BKGD_FREQS="$RESULT/background_nuc_freqs/$ASSEMBLY.chrM.nuc.freqs.tab"
         elif [[ $ignore_mode == "only-2micron" ]]; then
-            BKGD_FREQS="$RESULT/$ASSEMBLY.2micron.nuc.freqs.tab"
+            BKGD_FREQS="$RESULT/background_nuc_freqs/$ASSEMBLY.2micron.nuc.freqs.tab"
         else
-            BKGD_FREQS="$RESULT/$ASSEMBLY.genome.nuc.freqs.tab"
+            BKGD_FREQS="$RESULT/background_nuc_freqs/$ASSEMBLY.genome.nuc.freqs.tab"
         fi
 
         # signals need to be reverse complemented because the sequence is

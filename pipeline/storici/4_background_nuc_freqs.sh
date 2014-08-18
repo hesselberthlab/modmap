@@ -17,7 +17,12 @@ source $CONFIG
 BIN=$HOME/devel/modmap
 cd $BIN
 
-output="$RESULT/$ASSEMBLY.genome.nuc.freqs.tab"
+result="$RESULT/background_nuc_freqs"
+if [[ ! -d $result ]]; then
+    mkdir $result
+fi
+
+output="$result/$ASSEMBLY.genome.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -27,7 +32,7 @@ if [[ ! -f $output ]]; then
         > $output
 fi
 
-output="$RESULT/$ASSEMBLY.chrM.nuc.freqs.tab"
+output="$result/$ASSEMBLY.chrM.nuc.freqs.tab"
 if [[ ! -f $output ]]; then
     python -m modmap.genome_nuc_freqs \
         $FASTA \
@@ -39,7 +44,7 @@ if [[ ! -f $output ]]; then
 fi
 
 if [[ $ASSEMBLY == "sacCer2" ]]; then
-    output="$RESULT/$ASSEMBLY.2micron.nuc.freqs.tab"
+    output="$result/$ASSEMBLY.2micron.nuc.freqs.tab"
     if [[ ! -f $output ]]; then
         python -m modmap.genome_nuc_freqs \
             $FASTA \
