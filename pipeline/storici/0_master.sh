@@ -33,6 +33,13 @@ for assembly in ${ASSEMBLIES[@]}; do
     
     job_array="[1-$NUM_SAMPLES]"
 
+    # these are annotation jobs that don't wait, run them first
+    bsub -J "txn_regions_$ASSEMBLY" \
+        < $PIPELINE/make_transcribed_regions.sh
+
+    bsub -J "bkgd_freqs_$ASSEMBLY" \
+        < $PIPELINE/4_background_nuc_freqs.sh
+
     # job names look like: align_sacCer1[1-10]
     bsub -J "align_$ASSEMBLY$job_array" \
         < $PIPELINE/1_align.sh
@@ -50,10 +57,6 @@ for assembly in ${ASSEMBLIES[@]}; do
         -w "done(\"align_$ASSEMBLY*\") && \
             done(\"coverage_$ASSEMBLY*\")" \
         < $PIPELINE/99_geo_bundle.sh
-
-    # 1 job for each of 3 assemblies
-    bsub -J "bkgd_freqs_$ASSEMBLY" \
-        < $PIPELINE/4_background_nuc_freqs.sh
 
     bsub -J "nuc_freqs_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]') && \
