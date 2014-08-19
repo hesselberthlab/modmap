@@ -19,7 +19,7 @@ __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
 __version__ = '0.1'
 
-# Copyright 2013,2014 Jay R. Hesselberth
+# Copyright 2014 Jay R. Hesselberth
 
 def nuc_frequencies(bam_filename, fasta_filename, 
                     revcomp_strand, min_counts, 
