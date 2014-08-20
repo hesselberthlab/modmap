@@ -7,9 +7,13 @@ import sys
 
 from collections import Counter, defaultdict
 
+from toolshed import reader
 from pybedtools import BedTool
 
-from .common import load_coverage
+from rpy2.robjects.packages import importr
+stats = importr('stats')
+# poisson distribution 
+rpois = stats.rpois
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -22,8 +26,17 @@ def random_dist(bedgraph_filename, chrom_size_filename, interval_size,
 
     bedtool = BedTool(bedgraph_filename)
 
-    result = interval_counts(bedtool, interval_size, chrom_size_filename,
+    counts = interval_counts(bedtool, interval_size, chrom_size_filename,
                              only_chroms, ignore_chroms, verbose)
+
+    genome_size = calc_genome_size(chrom_size_filename,
+                                   only_chroms, ignore_chroms, verbose)
+
+    plambda = calc_lambda(bedtool, genome_size,
+                          only_chroms, ignore_chroms, verbose)
+
+    rand_counts = random_counts(genome_size, interval_size, plambda,
+                                verbose)
 
     ipdb.set_trace()
 
@@ -45,7 +58,7 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
            (ignore_chroms and row.chrom in ignore_chroms):
             continue
 
-        nums = row.name.split(',')
+        nums = [int(i) for i in row.name.split(',')]
         counts = Counter(nums)
 
         # find number of non-zero counts
@@ -54,11 +67,66 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
         total_size = int(row.end - row.start)
         num_zeros = total_size - total_counts
 
+        # change the 0 counts to the calculated number 
         counts[0] = num_zeros
 
         result[idx] = counts
 
     return result
+
+def random_counts(genome_size, interval_size, plambda, verbose):
+
+    result = defaultdict()
+
+    rand_obs = rpois(genome_size, plambda)
+
+    interval_count = 1
+    for idx in range(0, int(genome_size), interval_size):
+
+        obs = rand_obs[idx:idx+interval_size]
+
+        result[interval_count] = Counter(obs)
+
+        interval_count += 1
+
+    return result
+
+def calc_lambda(bedtool, genome_size, only_chroms,
+                ignore_chroms, verbose):
+    ''' generate counts from poisson from observed lambda and genome size
+    '''
+    # find lambda
+    total_counts = 0.0
+    for row in bedtool:
+        if (only_chroms and row.chrom not in only_chroms) or \
+           (ignore_chroms and row.chrom in ignore_chroms):
+            continue
+
+        total_counts += float(row['name'])
+
+    plambda = total_counts / genome_size
+
+    if verbose:
+        print >>sys.stderr, ">> lambda calc: %s" % str(plambda)
+
+    return plambda
+
+def calc_genome_size(chrom_size_filename, only_chroms,
+                     ignore_chroms, verbose):
+
+    genome_size = 0.0
+
+    for row in reader(chrom_size_filename, header=['chrom','size']):
+        if (only_chroms and row.chrom not in only_chroms) or \
+           (ignore_chroms and row.chrom in ignore_chroms):
+            continue
+
+        genome_size += float(row['size'])
+
+    if verbose:
+        print >>sys.stderr, ">> genome size: %s" % str(genome_size)
+
+    return genome_size
 
 def parse_options(args):
     from optparse import OptionParser, OptionGroup
