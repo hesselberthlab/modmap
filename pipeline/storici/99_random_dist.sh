@@ -37,26 +37,30 @@ cd $BIN
 
 bedgraphdir=$RESULT/$sample/bedgraphs
 
+interval_sizes=(500 2000 10000)
+
 for align_mode in ${ALIGN_MODES[@]}; do
 
     bedgraph="$bedgraphdir/$sample.align.$align_mode.strand.all.counts.bg"
 
-    result_tab="$results/random_dist.align.$align_mode.tab"
-    if [[ -f $result_tab ]]; then
-        rm -f $result_tab
-    fi
+    for interval_size in ${interval_sizes[@]}; do
+        result_tab="$results/random_dist.align.$align_mode.interval.$interval_size.tab"
+        if [[ -f $result_tab ]]; then
+            rm -f $result_tab
+        fi
 
-    for region_idx in ${!region_types[@]}; do
+        for region_idx in ${!region_types[@]}; do
 
-        region_type=${region_types[$region_idx]}
-        region_arg=${region_args[$region_idx]}
+            region_type=${region_types[$region_idx]}
+            region_arg=${region_args[$region_idx]}
 
-        python -m modmap.random_dist \
-            $bedgraph $CHROM_SIZES \
-            --region-type $region_type \
-            $region_arg \
-            --verbose \
-            >> $result_tab
+            python -m modmap.random_dist \
+                $bedgraph $CHROM_SIZES \
+                --region-type $region_type \
+                $region_arg \
+                --interval-size $interval_size \
+                --verbose \
+                >> $result_tab
+        done
     done
 done
-
