@@ -12,12 +12,12 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 # XXX testing
-CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
-ASSEMBLY=sacCer2
-DEBUG="-debug"
-RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
-CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-LSB_JOBINDEX=1
+#CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
+#ASSEMBLY=sacCer2
+#DEBUG="-debug"
+#RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
+#CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
+#LSB_JOBINDEX=1
 # XXX
 
 source $CONFIG

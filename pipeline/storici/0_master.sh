@@ -63,6 +63,10 @@ for assembly in ${ASSEMBLIES[@]}; do
             done('bkgd_freqs_$ASSEMBLY')" \
         < $PIPELINE/5_nuc_freqs.sh
 
+    bsub -J "rand_dist_$ASSEMBLY$job_array" \
+        -w "done('coverage_$ASSEMBLY[*]')" \
+        < $PIPELINE/99_random_dist.sh
+
     bsub -J "origin_anal_$ASSEMBLY$job_array" \
         -w "done('align_$ASSEMBLY[*]')" \
         < $PIPELINE/6_origin_analysis.sh
