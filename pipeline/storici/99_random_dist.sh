@@ -37,7 +37,7 @@ cd $BIN
 
 bedgraphdir=$RESULT/$sample/bedgraphs
 
-interval_sizes=(500 2000 10000)
+interval_sizes=(500 1000 2500 5000 10000)
 
 for align_mode in ${ALIGN_MODES[@]}; do
 
