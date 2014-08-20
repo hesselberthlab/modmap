@@ -83,7 +83,6 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
            (ignore_chroms and row.chrom in ignore_chroms):
             continue
 
-        print row
         nums = [int(i) for i in row.name.split(',')]
         counts = Counter(nums)
 

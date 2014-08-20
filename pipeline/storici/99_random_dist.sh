@@ -12,11 +12,12 @@ DOC
 set -o nounset -o pipefail -o errexit -x
 
 # XXX testing
-#CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
-#ASSEMBLY=sacCer2
-#RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
-#CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
-#LSB_JOBINDEX=1
+CONFIG=$HOME/devel/modmap/pipeline/storici/config.sh
+ASSEMBLY=sacCer2
+DEBUG="-debug"
+RESULT=$HOME/projects/collab/storici-lab/results/common$DEBUG/$ASSEMBLY
+CHROM_SIZES=$HOME/ref/genomes/$ASSEMBLY/$ASSEMBLY.chrom.sizes
+LSB_JOBINDEX=1
 # XXX
 
 source $CONFIG
@@ -29,16 +30,16 @@ if [[ ! -d $results ]]; then
 fi
 
 region_types=('nuc' 'mito')
-region_args=('--ignore-chrom chrM' '--include-chrom chrM')
+region_args=('--ignore-chrom chrM' '--only-chrom chrM')
               
 # XXX need to run module out of bin directory
 cd $BIN
 
-bedgraph=$RESULT/$sample/bedgraphs
+bedgraphdir=$RESULT/$sample/bedgraphs
 
 for align_mode in ${ALIGN_MODES[@]}; do
 
-    bedgraph="$bedgraphdir/$sample.align.$align_mode.strand.all.bg"
+    bedgraph="$bedgraphdir/$sample.align.$align_mode.strand.all.counts.bg"
 
     result_tab="$results/random_dist.align.$align_mode.tab"
     if [[ -f $result_tab ]]; then
