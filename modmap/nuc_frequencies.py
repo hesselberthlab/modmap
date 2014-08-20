@@ -259,8 +259,8 @@ def main(args=sys.argv[1:]):
 
     options, args = parse_options(args)
 
-    ignore_chroms = tuple(options.ignore_chrom)
-    only_chroms = tuple(options.only_chrom)
+    ignore_chroms = set(options.ignore_chrom)
+    only_chroms = set(options.only_chrom)
 
     kwargs = {'revcomp_strand':options.revcomp_strand,
               'min_counts':options.minimum_counts,

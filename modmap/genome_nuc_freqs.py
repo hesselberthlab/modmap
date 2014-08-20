@@ -120,8 +120,8 @@ def main(args=sys.argv[1:]):
 
     options, args = parse_options(args)
 
-    ignore_chroms = tuple(options.ignore_chrom)
-    only_chroms = tuple(options.only_chrom)
+    ignore_chroms = set(options.ignore_chrom)
+    only_chroms = set(options.only_chrom)
 
     kwargs = {'region_size_min':options.region_size_minimum,
               'region_size_max':options.region_size_maximum,
