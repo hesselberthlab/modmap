@@ -30,8 +30,8 @@ def random_dist(bedgraph_filename, chrom_size_filename, interval_size,
 
     bedtool = BedTool(bedgraph_filename)
 
-    counts = interval_counts(bedtool, interval_size, chrom_size_filename,
-                             only_chroms, ignore_chroms, verbose)
+    obs_counts, total_obs = interval_counts(bedtool, interval_size, chrom_size_filename,
+                                           only_chroms, ignore_chroms, verbose)
 
     genome_size = calc_genome_size(chrom_size_filename,
                                    only_chroms, ignore_chroms, verbose)
@@ -39,18 +39,18 @@ def random_dist(bedgraph_filename, chrom_size_filename, interval_size,
     plambda = calc_lambda(bedtool, genome_size,
                           only_chroms, ignore_chroms, verbose)
 
-    rand_counts = random_counts(genome_size, interval_size, plambda,
-                                verbose)
+    rand_counts, total_rand = random_counts(genome_size, interval_size, plambda,
+                                              verbose)
 
-    write_table(counts, data_type='obs', region_type=region_type,
+    write_table(obs_counts, total_obs, data_type='obs', region_type=region_type,
                 interval_size=interval_size, verbose=verbose)
-    write_table(rand_counts, data_type='rand', region_type=region_type,
+    write_table(rand_counts, total_rand, data_type='rand', region_type=region_type,
                 interval_size=interval_size, verbose=verbose)
 
-def write_table(counts, data_type, region_type, interval_size, verbose):
+def write_table(counts, total_intervals, data_type, region_type, interval_size, verbose):
 
-    header = ('#obs.counts','num.intervals','data.type',
-              'interval.size', 'region.type')
+    header = ('#obs.counts','num.intervals','prop.intervals',
+              'data.type','interval.size', 'region.type')
     print '\t'.join(map(str, header))
 
     num_interval = Counter() # number of intervals with this count
@@ -58,12 +58,20 @@ def write_table(counts, data_type, region_type, interval_size, verbose):
     for interval_num in counts:
         for site_count in counts[interval_num].keys():
             num_interval[site_count] += 1
+    
+    total_sites = 0
 
     for obs_counts, num_intervals in sorted(num_interval.items()):
 
-        fields = (obs_counts, num_intervals, data_type, interval_size, 
-                  region_type)
+        prop_intervals = float(num_intervals) / float(total_intervals)
+
+        fields = (obs_counts, num_intervals, prop_intervals,
+                  data_type, interval_size, region_type)
         print '\t'.join(map(str, fields))
+        total_sites += num_intervals
+
+    if verbose:
+        print >>sys.stderr, ">> reported %d sites among intervals" % total_sites
 
 def interval_counts(bedtool, interval_size, chrom_size_filename,
                     only_chroms, ignore_chroms, verbose):
@@ -77,11 +85,15 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
     # collapse per inteval (comma delim counts, or '0')
     mapresult = windows.map(bedtool, o='collapse', c=4, null=0)
 
+    total_intervals = 0
+
     for idx, row in enumerate(mapresult):
 
         if (only_chroms and row.chrom not in only_chroms) or \
            (ignore_chroms and row.chrom in ignore_chroms):
             continue
+
+        if row.end - row.start < interval_size: continue
 
         nums = [int(i) for i in row.name.split(',')]
         counts = Counter(nums)
@@ -97,12 +109,19 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
 
         result[idx] = counts
 
-    return result
+        total_intervals += 1
+
+    if verbose:
+        print >>sys.stderr, ">> seen %d intervals of obs data" \
+                             % total_intervals
+
+    return (result, total_intervals)
 
 def random_counts(genome_size, interval_size, plambda, verbose):
 
     result = defaultdict()
 
+    # generate `genome_size` number of observations
     rand_obs = rpois(genome_size, plambda)
 
     interval_count = 1
@@ -110,11 +129,17 @@ def random_counts(genome_size, interval_size, plambda, verbose):
 
         obs = rand_obs[idx:idx+interval_size]
 
+        if len(obs) < interval_size: continue
+
         result[interval_count] = Counter(obs)
 
         interval_count += 1
 
-    return result
+    if verbose:
+        print >>sys.stderr, ">> seen %d intervals of rand data" \
+                             % interval_count 
+
+    return (result, interval_count)
 
 def calc_lambda(bedtool, genome_size, only_chroms,
                 ignore_chroms, verbose):
