@@ -22,7 +22,11 @@ __version__ = '0.1'
 # Copyright 2014 Jay R. Hesselberth
 
 def random_dist(bedgraph_filename, chrom_size_filename, interval_size,
-                only_chroms, ignore_chroms, verbose):
+                region_type, only_chroms, ignore_chroms, verbose):
+
+    print >>sys.stderr, ">> only chroms: %s" % str(only_chroms)
+    print >>sys.stderr, ">> ignore chroms: %s" % str(ignore_chroms)
+    print >>sys.stderr, ">> interval size: %s" % str(interval_size) 
 
     bedtool = BedTool(bedgraph_filename)
 
@@ -38,7 +42,28 @@ def random_dist(bedgraph_filename, chrom_size_filename, interval_size,
     rand_counts = random_counts(genome_size, interval_size, plambda,
                                 verbose)
 
-    ipdb.set_trace()
+    write_table(counts, data_type='obs', region_type=region_type,
+                interval_size=interval_size, verbose=verbose)
+    write_table(rand_counts, data_type='rand', region_type=region_type,
+                interval_size=interval_size, verbose=verbose)
+
+def write_table(counts, data_type, region_type, interval_size, verbose):
+
+    header = ('#obs.counts','num.intervals','data.type',
+              'interval.size', 'region.type')
+    print '\t'.join(map(str, header))
+
+    num_interval = Counter() # number of intervals with this count
+
+    for interval_num in counts:
+        for site_count in counts[interval_num].keys():
+            num_interval[site_count] += 1
+
+    for obs_counts, num_intervals in sorted(num_interval.items()):
+
+        fields = (obs_counts, num_intervals, data_type, interval_size, 
+                  region_type)
+        print '\t'.join(map(str, fields))
 
 def interval_counts(bedtool, interval_size, chrom_size_filename,
                     only_chroms, ignore_chroms, verbose):
@@ -47,7 +72,7 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
 
     # make windows for analysis
     windows = BedTool().window_maker(w=interval_size,
-                                     g=chrom_size_filename)
+                                     g=chrom_size_filename).sort()
 
     # collapse per inteval (comma delim counts, or '0')
     mapresult = windows.map(bedtool, o='collapse', c=4, null=0)
@@ -58,6 +83,7 @@ def interval_counts(bedtool, interval_size, chrom_size_filename,
            (ignore_chroms and row.chrom in ignore_chroms):
             continue
 
+        print row
         nums = [int(i) for i in row.name.split(',')]
         counts = Counter(nums)
 
@@ -117,8 +143,8 @@ def calc_genome_size(chrom_size_filename, only_chroms,
     genome_size = 0.0
 
     for row in reader(chrom_size_filename, header=['chrom','size']):
-        if (only_chroms and row.chrom not in only_chroms) or \
-           (ignore_chroms and row.chrom in ignore_chroms):
+        if (only_chroms and row['chrom'] not in only_chroms) or \
+           (ignore_chroms and row['chrom'] in ignore_chroms):
             continue
 
         genome_size += float(row['size'])
@@ -143,6 +169,11 @@ def parse_options(args):
     group.add_option("--interval-size", type='int',
         metavar="SIZE", default=10000,
         help="size of interval for counts"
+        " (default: %default)")
+
+    group.add_option("--region-type", type='str',
+        metavar="CHROM", default='generic',
+        help="label for region type in output"
         " (default: %default)")
 
     group.add_option("--ignore-chrom", action="append",
@@ -174,10 +205,11 @@ def main(args=sys.argv[1:]):
 
     options, args = parse_options(args)
 
-    ignore_chroms = tuple(options.ignore_chrom)
-    only_chroms = tuple(options.only_chrom)
+    ignore_chroms = set(options.ignore_chrom)
+    only_chroms = set(options.only_chrom)
 
     kwargs = {'interval_size':options.interval_size,
+              'region_type':options.region_type,
               'ignore_chroms':ignore_chroms,
               'only_chroms':only_chroms,
               'verbose':options.verbose}
