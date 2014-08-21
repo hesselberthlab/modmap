@@ -64,7 +64,7 @@ def calc_signals(bam_filename, region_bed_filename, signal_colnum,
                                              c=signal_colnum, null=0)
 
             for region_row, signal_row in izip(region_bedtool, map_bedtool):
-   
+ 
                 try:
                     region_name = region_row[3]
                     region_score = region_row[4]
@@ -90,8 +90,9 @@ def calc_signals(bam_filename, region_bed_filename, signal_colnum,
                     region_size = float(region_row.end - region_row.start)
                     signal = signal / region_size
 
-                result = (region_name, region_score, region_strand,
-                          region_type, signal_strand, oper, signal, signal_type)
+                result = (region_name, region_score, 'region-'+region_strand,
+                          region_type, 'signal-'+signal_strand,
+                          oper, signal, signal_type)
 
                 yield result
 
