@@ -12,6 +12,9 @@ DOC
 
 set -o nounset -o pipefail -o errexit -x
 
+# XXX
+# source debug-config.sh
+
 source $CONFIG
 
 # output directory
@@ -34,12 +37,15 @@ bedtools bed12tobed6 -i $genesbed \
     > $bed6genes
 
 strands="+ -"
+
 for strand in $strands; do
+
     awk -v strand=$strand '$6 == strand' \
         < $bed6genes \
         | bedtools merge -i - \
         | awk -v strand=$strand \
             'BEGIN {OFS="\t"} {print $0, ".", strand}' \
+
 done | bedtools sort -i - > $genes
 
 bedtools complement -i $genes -g $CHROM_SIZES \
