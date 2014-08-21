@@ -41,7 +41,8 @@ strands="+ -"
 for strand in $strands; do
 
     awk -v strand=$strand '$6 == strand' \
-        < $bed6genes \
+        < $genesbed \
+        | bedtools sort -i - \
         | bedtools merge -i - \
         | awk -v strand=$strand \
             'BEGIN {OFS="\t"} {print $0, ".", ".", strand}' \
