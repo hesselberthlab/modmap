@@ -44,7 +44,7 @@ for strand in $strands; do
         < $bed6genes \
         | bedtools merge -i - \
         | awk -v strand=$strand \
-            'BEGIN {OFS="\t"} {print $0, ".", strand}' \
+            'BEGIN {OFS="\t"} {print $0, ".", ".", strand}' \
 
 done | bedtools sort -i - > $genes
 
