@@ -25,16 +25,8 @@ fi
 
 genesbed=$DATA/$ASSEMBLY/sgdGene.bed
 
-bed6genes="$results/$(basename $genesbed .bed).bed6"
 genes="$results/$(basename $genesbed .bed).bed"
 comp_genes="$results/$(basename $genesbed .bed).complement.bed"
-
-# need to deal with pos and neg strands separately because strand info is
-# lost in the merge, have to add it back at the end
-
-bedtools bed12tobed6 -i $genesbed \
-    | bedtools sort -i - \
-    > $bed6genes
 
 strands="+ -"
 
