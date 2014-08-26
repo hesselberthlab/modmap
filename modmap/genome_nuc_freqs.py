@@ -20,7 +20,7 @@ def genome_nuc_freqs(fasta_filename, region_size_min, region_size_max,
     header = ('#region.size','nuc','count','freq')
     print '\t'.join(header)
 
-    nuc_counts = calc_nuc_counts(fasta_filename, region_size_min,
+    nuc_counts = calc_bkgd_counts(fasta_filename, region_size_min,
                                  region_size_max, ignore_chroms,
                                  only_chroms, verbose)
 
@@ -32,7 +32,7 @@ def genome_nuc_freqs(fasta_filename, region_size_min, region_size_max,
             nuc_freq = count / nuc_sum
             print '%d\t%s\t%s\t%s' % (region_size, nuc, str(count), str(nuc_freq))
 
-def calc_nuc_counts(fasta_filename, region_size_min,
+def calc_bkgd_counts(fasta_filename, region_size_min,
                     region_size_max, ignore_chroms,
                     only_chroms, verbose):
     ''' calculate nuc frequencies for normalization.
