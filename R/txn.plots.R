@@ -37,14 +37,14 @@ txn.box.plot <- function(df, sample.name, ... ) {
     # add label columns
     compartment <- sapply(as.character(df$region.type), 
                           function (x) strsplit(x, '-')[[1]][1])
-    df$compartment <- compartment
+    df$compartment <- as.factor(compartment)
     
     region <- sapply(as.character(df$region.type), 
                      function (x) strsplit(x, '-')[[1]][2])
-    df$region <- region
+    df$region <- as.factor(region)
    
     # calculate t.tests among groups
-    stats <- ddply(df, operation ~ compartment,
+    stats <- ddply(df, operation ~ compartment + signal.strand,
                    function (x) {
                    t <- t.test(signal ~ region, data = x)
                    with(t, data.frame(statistic, p.value))})
@@ -53,16 +53,17 @@ txn.box.plot <- function(df, sample.name, ... ) {
                  aes(factor(region),
                      log10(signal)))
 
-    gp <- gp + geom_boxplot(aes(fill = factor(region)))
-    gp <- gp + scale_fill_brewer(palette="Set1", guide=FALSE)
+    gp <- gp + geom_boxplot(aes(fill = factor(region)),
+                            show_guide = FALSE)
+    gp <- gp + scale_fill_brewer(palette="Set1")
           
-    gp <- gp + facet_grid(operation ~ compartment)
+    gp <- gp + facet_grid(operation + compartment ~ signal.strand)
     gp <- gp + theme_bw()
 
     gp <- gp + geom_text(data = stats,
                          aes(label = paste("t.test stat=", signif(statistic,5), "\n", 
                                            "p=", signif(p.value,5), "\n", sep=''),
-                         x=-Inf, y=Inf, hjust=0, vjust=1))
+                         x=-Inf, y=Inf, hjust=0, vjust=1, size=4))
    
     # XXX val is log10 to be placed correctly on y-axis
     text.pos <- log10(mean(df$signal[df$signal > 0]))
