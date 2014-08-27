@@ -11,7 +11,7 @@ to annotated origins:
 '''
 
 import sys
-import pdb
+import ipdb
 
 from operator import itemgetter
 from collections import defaultdict
@@ -20,6 +20,7 @@ from pybedtools import BedTool
 
 from .common import load_coverage, STRANDS
 from .nuc_frequencies import calc_nuc_counts
+from .genome_nuc_freqs import calc_bkgd_counts
 
 __author__ = 'Jay Hesselberth'
 __contact__ = 'jay.hesselberth@gmail.com'
@@ -39,29 +40,34 @@ def origin_analysis(origin_bed, timing_bedgraph, bam_filename,
     neg_signal_bedtool = load_coverage(bam_filename, strand='neg',
                                        verbose=verbose) 
 
-    ori_signals = calc_origin_signals(origin_bedtool,
+    ori_signals, bkgd_freqs = calc_origin_signals(origin_bedtool,
                                       pos_signal_bedtool,
                                       neg_signal_bedtool,
+                                      fasta_filename,
                                       chrom_sizes_filename,
                                       flank_size, verbose)
 
-    origin_result = calc_origin_nuc_counts(ori_signals,
+    origin_result, bkgd_freqs  = calc_origin_nuc_counts(ori_signals,
+                                           bkgd_freqs,
                                            pos_signal_bedtool,
                                            neg_signal_bedtool,
                                            fasta_filename,
                                            verbose)
 
-    print_report(origin_result, max_timing, flank_size, verbose)
+    print_report(origin_result, bkgd_freqs, max_timing, flank_size, verbose)
 
-def print_report(origin_result, max_timing, flank_size, verbose):
+def print_report(origin_result, bkgd_freqs, max_timing, flank_size, verbose):
     ''' print report of nuc_counts with frequency calculations '''
 
-    header = ('#nuc','offset','count','freq','total.sites',
-              'max.timing','flank.size','strand',) 
+    header = ('#nuc','offset','count','freq','norm.freq',
+              'total.sites','max.timing','flank.size','strand',) 
     print '\t'.join(header)
 
     for strand, tup in origin_result.items():
+
         total_sites, nuc_counts = tup
+
+        strand_bkgd_freqs = bkgd_freqs[strand]
 
         for offset, counts in sorted(nuc_counts.items()):
             sum_counts = sum(counts.values())
@@ -70,13 +76,17 @@ def print_report(origin_result, max_timing, flank_size, verbose):
                                      reverse=True):
 
                 freq = float(count) / float(sum_counts)
+                
+                norm_factor = strand_bkgd_freqs[nuc]
+                norm_freq = freq / norm_factor
 
-                vals = map(str, [nuc, offset, count, freq, total_sites,
-                                 max_timing, flank_size, strand])
+                vals = map(str, [nuc, offset, count, freq, norm_freq,
+                                 total_sites, max_timing, flank_size,
+                                 strand])
 
                 print '\t'.join(vals)
 
-def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
+def calc_origin_nuc_counts(ori_signals, bkgd_freqs, pos_signal_bedtool,
                            neg_signal_bedtool, fasta_filename, verbose):
 
     ''' calculate nucleotide frequencies within origins.
@@ -106,10 +116,16 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
               'only_chroms':[],
               'verbose':verbose}
 
+    # bkgd_freqs reported relative to leading and lagging
+    result_bkgd_freqs = defaultdict(dict)
+
     # keys are ori_strand, values are (sites, nuc_counts)
     result = defaultdict(dict)
 
     ori_strands = ('leading', 'lagging')
+
+    # XXX default size for bkgd freqs
+    default_size = 1
 
     # XXX refer to drawing on board for these updated settings
     # `leading` and `lagging` represent the **template** strand
@@ -118,11 +134,17 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
         if ori_strand == 'lagging':
             pos_signal_bedtool = ori_signals['pos']['right']
             neg_signal_bedtool = ori_signals['neg']['left']        
-       
+    
+            pos_counts = bkgd_freqs['pos']['right'][default_size]
+            neg_counts = bkgd_freqs['neg']['left'][default_size]
+
         elif ori_strand == 'leading':
             pos_signal_bedtool = ori_signals['pos']['left']
             neg_signal_bedtool = ori_signals['neg']['right']        
         
+            pos_counts = bkgd_freqs['pos']['left'][default_size]
+            neg_counts = bkgd_freqs['neg']['right'][default_size]
+
         if verbose:
             print >>sys.stderr, ">> nuc.freq on %s strand ..." % ori_strand
 
@@ -131,12 +153,23 @@ def calc_origin_nuc_counts(ori_signals, pos_signal_bedtool,
                                                   fasta_filename,
                                                   **kwargs)
 
+        # combine the counts on the appropriate strand
+        total_counts = float(sum(pos_counts.values()) +
+                             sum(neg_counts.values()))
+
+        summed_counts = pos_counts + neg_counts
+
+        for nuc, count in summed_counts.items():
+            freq = float(count) / total_counts
+            result_bkgd_freqs[ori_strand][nuc] = freq
+
         result[ori_strand] = (total_sites, nuc_counts)
 
-    return result
+    return (result, result_bkgd_freqs)
 
 def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
-                        neg_signal_bedtool, chrom_sizes_filename,
+                        neg_signal_bedtool, fasta_filename,
+                        chrom_sizes_filename,
                         flank_size, verbose):
 
     ''' calcualte signals within flanks up and downstream of selected
@@ -153,6 +186,7 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
     '''
 
     result = defaultdict(dict)
+    bkgd_freqs = defaultdict(dict)
 
     origin_sides = ('left','right')
 
@@ -174,10 +208,47 @@ def calc_origin_signals(origin_bedtool, pos_signal_bedtool,
                 flank_bedtool = origin_bedtool.flank(l=0, r=flank_size,
                                                      g=chrom_sizes_filename)
 
+            # XXX calc bkgd freqs for each flank, return with the result
+            flank_freqs = calc_origin_bkgd_freqs(flank_bedtool, strand,
+                                                 fasta_filename, verbose) 
+
+            bkgd_freqs[strand][side] = flank_freqs
+
             result[strand][side] = signal_bedtool.intersect(flank_bedtool)
 
-    return result
+    return (result, bkgd_freqs)
 
+def calc_origin_bkgd_freqs(bedtool, strand, fasta_filename, verbose):
+
+    # add strand to bedtool
+    if strand == 'pos':
+        strand_char = '+'
+    elif strand == 'neg':
+        strand_char = '-'
+
+    intervals = []
+    for row in bedtool:
+        # input is BED6, output needs BED6
+        row.strand = strand_char
+        intervals.append(row)
+
+    stranded_bedtool = BedTool(intervals)
+
+    fastatool = stranded_bedtool.sequence(fi=fasta_filename, s=True)
+
+    kwargs = {'region_size_min':1,
+              'region_size_max':1,
+              'ignore_chroms':[],
+              'only_chroms':[],
+              'verbose':verbose}
+
+    if verbose:
+        print >>sys.stderr, ">> calculating background freqs ..."
+
+    result = calc_bkgd_counts(fastatool.seqfn, **kwargs)
+
+    return result
+                              
 def select_origins(origin_bed, timing_bedgraph, max_timing, verbose):
     ''' select origins based on max_timing.
     

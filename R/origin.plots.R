@@ -21,7 +21,7 @@ sample.name = output[2]
 output.dir = output[3]
 
 COLNAMES <- c('nuc','offset','count','freq',
-              'total.sites','max.timing',
+              'norm.freq', 'total.sites','max.timing',
               'flank.size','strand')
 
 df <- read.table(infile, col.names=COLNAMES)
@@ -66,7 +66,7 @@ origin.nuc.freq.zoom.ggplot <- function(df, sample.name, ... ) {
     df <- subset(df, flank.size >= 5000 & max.timing >= 30)
 
     gp <- ggplot(data = df, 
-                 aes(x=offset, y=freq, color=nuc))
+                 aes(x=offset, y=norm.freq, color=nuc))
 
     gp <- gp + geom_line()
     gp <- gp + geom_point(aes(size=3), show_guide = FALSE)
