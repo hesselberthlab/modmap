@@ -42,7 +42,7 @@ def calc_bkgd_counts(fasta_filename, region_size_min,
 
     nuc_counts = defaultdict(Counter)
 
-    fasta = Fasta(fasta_filename, as_raw=True)
+    fasta = Fasta(fasta_filename, as_raw = True)
 
     for chrom in fasta.keys():
 
