@@ -166,11 +166,11 @@ def calc_origin_nuc_counts(ori_signals, bkgd_freqs, pos_signal_bedtool,
         result[ori_strand] = (total_sites, nuc_counts)
 
     if verbose:
-        print >>sys.stderr, "# Calculated base frequencies"
+        print "# Calculated base frequencies"
         for strand in result_bkgd_freqs:
             for nuc, freq in result_bkgd_freqs[strand].items():
                 fields = (nuc, freq, strand)
-                print >>sys.stderr, '#', '\t'.join(map(str, fields))
+                print '#', '\t'.join(map(str, fields))
 
     return (result, result_bkgd_freqs)
 
