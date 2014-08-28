@@ -76,6 +76,7 @@ def calc_signals(bam_filename, region_bed_filename, signal_colnum,
                                                    region_row.start,
                                                    region_row.end)
                     region_score = 0
+                    # default
                     region_strand = 'none'
 
                 if region_strand == '+':
