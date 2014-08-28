@@ -10,6 +10,7 @@
 library(ggplot2)
 library(Cairo)
 library(plyr)
+library(dplyr)
 
 # get the filename
 output = commandArgs(trailingOnly=TRUE)
