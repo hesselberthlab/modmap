@@ -157,7 +157,7 @@ def calc_lambda(bedtool, genome_size, only_chroms,
     plambda = total_counts / genome_size
 
     if verbose:
-        print ">> lambda value: %s" % str(plambda)
+        print "# lambda value: %s" % str(plambda)
 
     return plambda
 
