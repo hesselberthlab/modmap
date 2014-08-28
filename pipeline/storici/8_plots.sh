@@ -66,7 +66,7 @@ for aln_idx in ${!ALIGN_MODES[@]}; do
 
     counts="$results/transcription_analysis/txn_analysis.align.$align_mode.tab"
     sampleid="$sample.align-$align_mode"
-    Rscript $RSCRIPTS/txn.plots.R $counts "$sampleid" $subplotdir
+    Rscript $RSCRIPTS/transcription.analysis.R $counts "$sampleid" $subplotdir
 
     # --- nuc_freq plots ------------------------------------
     subplotdir="$plotdir/nuc_freqs"
