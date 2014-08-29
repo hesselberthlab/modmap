@@ -74,12 +74,11 @@ txn.box.plot <- function(df, sample.name, ... ) {
                    function (x) strsplit(x, '-')[[1]][2])
   df$region <- as.factor(region)
   
-  df <- add.missing.data(df)
-  # df <- subset(df, region.strand != 'region-none')
-  
+  df <- droplevels(add.missing.data(df))
+
   # calculate t.tests among groups
   stats <- ddply(df,
-                operation ~ compartment + 
+                operation + compartment ~ 
                   region.strand + signal.strand,
                  function (x) {
                    obj <- try(t.test(signal ~ region, data = x))
@@ -97,7 +96,8 @@ txn.box.plot <- function(df, sample.name, ... ) {
                           show_guide = FALSE)
   gp <- gp + scale_fill_brewer(palette="Set1")
   
-  gp <- gp + facet_grid(operation ~ compartment + signal.strand + region.strand)
+  gp <- gp + facet_grid(operation + compartment ~ 
+                          signal.strand + region.strand)
   gp <- gp + theme_bw()
   
   gp <- gp + geom_text(data = stats,
