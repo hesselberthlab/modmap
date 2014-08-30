@@ -36,7 +36,7 @@ head(df)
 exp.corr.plot <- function(df, sample.name, ... ) {
 
     # subset data for plotting on log scale - extreme small numbers
-    df <- subset(df, region.score > 0)
+    df <- subset(df, region.score >= 1 & signal >= 1)
 
     # remove outliers
     box.stats <- boxplot.stats(df$region.score)$stats
