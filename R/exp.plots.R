@@ -36,15 +36,15 @@ head(df)
 
 exp.corr.plot <- function(df, sample.name, ... ) {
 
-    # subset data
-    df <- subset(df, region.score >= 1 & signal >= 1)
-
     # remove outliers
     box.stats <- boxplot.stats(df$region.score)$stats
     lower.adj <- box.stats[1]
     upper.adj <- box.stats[5]
 
     df <- subset(df, region.score > lower.adj & region.score < upper.adj)
+
+    # subset data for plotting on log scale - extreme small numbers
+    df.plot <- subset(df, region.score > 1e-3)
 
     # calculate correlations
     corrs <- ddply(df, operation ~ region.strand + signal.strand,
@@ -54,7 +54,7 @@ exp.corr.plot <- function(df, sample.name, ... ) {
                    num.regions = length(signal),
                    signal.sum = sum(signal))
 
-    gp <- ggplot(data = df,
+    gp <- ggplot(data = df.plot,
                  aes(x=log2(region.score),
                      y=log2(signal)))
 
