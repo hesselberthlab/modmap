@@ -79,7 +79,7 @@ txn.box.plot <- function(df, sample.name, ... ) {
   # calculate t.tests among groups
   stats <- ddply(df,
                 operation + compartment ~ 
-                  region.strand + signal.strand,
+                  signal.strand,
                  function (x) {
                    obj <- try(t.test(signal ~ region, data = x))
                    if (is(obj, "try-error")) {
@@ -97,7 +97,7 @@ txn.box.plot <- function(df, sample.name, ... ) {
   gp <- gp + scale_fill_brewer(palette="Set1")
   
   gp <- gp + facet_grid(operation + compartment ~ 
-                          signal.strand + region.strand)
+                          signal.strand)
   gp <- gp + theme_bw()
   
   gp <- gp + geom_text(data = stats,
