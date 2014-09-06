@@ -23,8 +23,7 @@ sample.name = output[2]
 output.dir = output[3]
 
 COLNAMES <- c('region.name', 'region.score', 'region.strand',
-              'region.type', 'signal.strand', 'operation',
-              'signal', 'signal.type')
+             'signal.strand', 'operation', 'signal')
 
 df <- read.table(infile, col.names=COLNAMES)
 if (nrow(df) == 0) {
@@ -36,7 +35,7 @@ head(df)
 
 exp.corr.plot <- function(df, sample.name, ... ) {
 
-    # subset data
+    # subset data for plotting on log scale - extreme small numbers
     df <- subset(df, region.score >= 1 & signal >= 1)
 
     # remove outliers

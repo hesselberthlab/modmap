@@ -55,7 +55,6 @@ for align_mode in ${ALIGN_MODES[@]}; do
 
         python -m modmap.signal_analysis \
             $BAM $region_filename $CHROM_SIZES \
-            --region-type $region_type \
             --verbose \
             >> $result_tab
     done
