@@ -1,8 +1,10 @@
 library(ggplot2)
 library(dplyr)
+
 colnames <- c('pos','count','sample','strand',
               'align.mode','treatment','hyb','exp.name',
               'scale')
+
 df <- read.table('combined.tab.gz', col.names=colnames, sep='\t')
 
 df$sample.num <- as.integer(str_sub(df$sample,3,4))
