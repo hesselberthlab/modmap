@@ -1,6 +1,12 @@
 #! /usr/bin/env python
 
-''' modmap.random_dist '''
+'''
+modmap.random_dist
+------------------
+
+calculate observed and expected distribution of counts based on the
+poisson distribution. reports a table  that is facetable by data type. 
+'''
 
 import ipdb
 import sys

@@ -4,8 +4,7 @@
 # __contact__ = 'jay.hesselberth@gmail.com'
 # __version__ = '$Revision: 552 $'
 #
-# modmap pipeline for plotting signals relative to
-# expression levels
+# modmap pipeline for plotting signals relative to  expression levels
 
 library(ggplot2)
 library(Cairo)

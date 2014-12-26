@@ -1,7 +1,11 @@
 #! /usr/bin/env python
 
-''' modmap.nuc_frequencies: calculate nucleotide frequencies at modified base
-sites.
+'''
+modmap.nuc_frequencies
+----------------------
+
+calculate nucleotide frequencies at modified base sites. Reports a table
+that is facetable by region size and position.
 '''
 
 import sys

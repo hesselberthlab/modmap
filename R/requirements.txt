@@ -1,0 +1,7 @@
+ggplot2
+RColorBrewer
+dplyr
+plyr
+Cairo
+gridExtra
+optparse

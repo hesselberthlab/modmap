@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 
-''' modmap.summary_table: XXX
+'''
+modmap.summary_table
+--------------------
+
+report a summary table from bedgraph files using the `multiintersect` tool
+from pybedtools.
 '''
 
 import sys

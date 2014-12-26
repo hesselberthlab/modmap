@@ -1,7 +1,13 @@
 #! /usr/bin/env python
 
-''' modmap.genome_nuc_freqs: calculate background nucleotide frequencies
-and report a table
+'''
+modmap.genome_nuc_freqs
+-----------------------
+
+calculate background nucleotide frequencies report a table of raw and
+normalized frequencies. 
+
+$ python -m modmap.genome_nuc_freqs --help
 '''
 
 import ipdb

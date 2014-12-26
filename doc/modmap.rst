@@ -12,8 +12,8 @@ modmap: software for analyzing modified bases in the genome
 
 .. currentmodule:: modmap
 
-The modmap software enables the analysis of modified bases in genomic DNA
-identified by BE-seq or equivalent methods.
+The modmap software is a simple set of analysis tools supporting methods
+for mapping nucleobases in genomes.
 
 Programs
 ========
