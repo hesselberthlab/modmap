@@ -19,6 +19,8 @@ strands=("pos" "neg")
 for sample in ${samples[@]}; do
 
     samplenum=$(echo $sample | sed 's/JS//')
+    hyb="enriched"
+
     if [[ $samplenum -gt 63 ]]; then
         treatment="udg"
     else

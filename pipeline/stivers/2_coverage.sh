@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#BSUB -J coverage[1-56]%12
+#BSUB -J coverage[1-62]%12
 #BSUB -e coverage.%J.%I.err
 #BSUB -o coverage.%J.%I.out
 #BSUB -q normal
