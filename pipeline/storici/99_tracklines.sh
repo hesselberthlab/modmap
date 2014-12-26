@@ -14,7 +14,7 @@ set -o nounset -o pipefail -o errexit -x
 source $CONFIG
 
 urlbase="http://amc-sandbox.ucdenver.edu"
-strands=("all" "pos" "neg")
+strands=("pos" "neg")
 umi_types=("removed" "UMIs_not_removed")
 
 tracklinefile=$RESULT/tracklines.txt
@@ -53,7 +53,7 @@ for sample_idx in ${!SAMPLES[@]}; do
             track_color="color=$color"
 
             #bigbed tracks
-            bigbed="$bigbeddir/${sample}.${strand}.align.${align_mode}_peaks.bb"
+            bigbed="$bigbeddir/${sample}.align.${align_mode}.strand.${strand}.peaks.bb"
             bigbed_name="name='${sample} ${strand} ${align_mode} peaks'"
             bigbed_descrip="description='$descrip PEAKS sample=$sample \
                             strand=$strand \
