@@ -8,6 +8,11 @@
 
 <<DOC
 master analysis loop for storici mopmap pipeline
+
+relies on LSF job scheduler.
+
+XXX TODO:
+- move to drmaa execution via snakemake.
 DOC
 
 set -o nounset -o pipefail -o errexit -x
