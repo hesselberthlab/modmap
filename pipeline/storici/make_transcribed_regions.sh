@@ -43,6 +43,7 @@ done | bedtools sort -i - > $genes
 
 bedtools complement -i $genes -g $CHROM_SIZES \
     | bedtools sort -i - \
+    | awk 'BEGIN {OFS="\t"} {print $0, ".", ".", "."}' \
     > $comp_genes
 
 # get mito regions
