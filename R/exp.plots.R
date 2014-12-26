@@ -23,7 +23,8 @@ sample.name = output[2]
 output.dir = output[3]
 
 COLNAMES <- c('region.name', 'region.score', 'region.strand',
-             'signal.strand', 'operation', 'signal')
+              'region.type', 'signal.strand', 'operation',
+              'signal', 'signal.type')
 
 df <- read.table(infile, col.names=COLNAMES)
 if (nrow(df) == 0) {
