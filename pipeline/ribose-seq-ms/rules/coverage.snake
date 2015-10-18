@@ -1,0 +1,34 @@
+
+rule end_coverage:
+    input:
+        'alignment/{sample}/{sample}.bam'
+    output:
+        'coverage/{sample}/{sample}.{side}.{strand}.bg.gz'
+    params:
+        side_arg = lambda wildcards: SIDES[wildcards.side],
+        strand_arg = lambda wildcards: STRANDS[wildcards.strand],
+        job_name = 'coverage.{sample}.{side}.{strand}'
+    log:
+        'logs/{sample}/coverage.log'
+    shell:
+        "bedtools genomecov -ibam {input} -g {CHROMSIZE} -bg "
+        "{params.strand_arg} {params.side_arg} "
+        "| bedtools sort -i - "
+        "| gzip -c > {output}"
+
+rule coverage_bigwigs:
+    input:
+        'coverage/{sample}/{sample}.combined.{strand}.bg.gz'
+    output:
+        temp('coverage/{sample}/{sample}.{strand}.bg'),
+        'coverage/{sample}/{sample}.{strand}.bw'
+    params:
+        tempfile = 'coverage/{sample}/{sample}.{strand}.bg',
+        job_name = 'coverage.bigwig.{sample}.{strand}',
+    log:
+        'logs/{sample}/coverage.bigwig.{strand}.log'
+    shell:
+        "zcat {input} > {params.tempfile}; "
+        "bedGraphToBigWig {params.tempfile} {CHROMSIZE} {output[1]}"
+
+

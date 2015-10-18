@@ -1,0 +1,70 @@
+
+''' Snakefile for ribose-seq manuscript pipeline '''
+
+__author__ = 'Jay Hesselberth <jay.hesselberth@gmail.com>'
+
+ASSEMBLIES=('sacCer1', 'sacCer2', 'sacCer3')
+
+from datetime import date
+today = date.today().isoformat()
+workdir: "results-ribose-seq/%s" % today
+
+STRANDS = {'pos':'-strand +', 'neg':'-strand -'}
+SIDES = {'5p':'-5', '3p':'-3'}
+
+# XXX these are assembly dependent so need to be generated dynamically
+FASTA = config['FASTA']
+BOWTIEIDX = config['BOWTIEIDX']
+CHROMSIZE = config['CHROMSIZE']
+
+rule all:
+    params:
+        # XXX define assembly, index and chromsize here
+
+include: 'rules/fastq.snake'
+include: 'rules/align.snake'
+include: 'rules/coverage.snake'
+
+'''
+rule make_transcripts:
+    pass
+
+rule background_freqs:
+    pass
+
+rule tracklines:
+    pass
+
+rule coverage:
+    pass
+
+rule peaks:
+    pass
+
+rule peaks_summary:
+    pass
+
+rule summary_table:
+    pass
+
+rule geo_bundle:
+    pass
+
+rule random_dists:
+    pass
+
+rule origin_analysis:
+    pass
+
+rule nuc_freqs:
+    pass
+
+rule expression_analysis:
+    pass
+
+rule transcription_analysis:
+    pass
+
+rule plots:
+    pass
+'''

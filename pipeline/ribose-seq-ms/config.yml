@@ -1,0 +1,49 @@
+descrip: Global mapping of ribonucleotides embedded in DNA
+geo: GSE61464
+pmid: 25622106
+
+geo_ids:
+    - GSM1505384
+    - GSM1505385
+    - GSM1505386
+    - GSM1505387
+    - GSM1505388
+    - GSM1505389
+    - GSM1505390
+    - GSM1505391
+    - GSM1505392
+
+samples:
+	- FS15
+	- FS16
+	- FS8
+	- FS10
+	- FS14
+	- FS3
+	- FS9
+	- FS6
+	- FS5
+
+descrips:
+    - rnh201 (KK-100)
+    - rnh201 (KK-100, EconoTaq)
+    - rnh201 (KK-30)
+    - rnh1 rnh201 (KK-174)
+    - rnh1 rnh201 (KK-125)
+    - rnh1 rnh201 ung1 (KK-164)
+    - pol2-M644G rnh201 (KK-170)
+    - pol2-4 rnh201 (KK-107)
+    - pol3-5DV rnh201 (KK-120)
+
+urls:
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575897/SRR1575897.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575898/SRR1575898.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575899/SRR1575899.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575900/SRR1575900.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575901/SRR1575901.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575902/SRR1575902.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575903/SRR1575903.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575904/SRR1575904.sra
+    - ftp://ftp-trace.ncbi.nlm.nih.gov/sra/sra-instant/reads/ByStudy/sra/SRP%2FSRP047%2FSRP047172/SRR1575905/SRR1575905.sra
+
+

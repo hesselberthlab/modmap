@@ -1,0 +1,41 @@
+
+''' rules for alignment and coverage generation '''
+
+rule umi_trim:
+    input:
+        'raw/{sample}.fq.gz'
+    output:
+        'raw/{sample}.umi.fq.gz'
+    shell:
+        'umitools trim {input} {UMI} | gzip -c > {output}'
+
+rule align:
+    input:
+        'raw/{sample}.umi.fq.gz'
+    output:
+        'alignment/{sample}/{sample}.umi.bam'
+    params:
+        sample = '{sample}',
+        job_name = 'align.{sample}',
+        stats = 'alignment/{sample}/{sample}.{align_mode}.alignment_stats.txt'
+    threads: 8
+    log:
+        'logs/{sample}/align.log'
+    shell:
+        "bowtie2 -x {BOWTIEIDX} -U {input} -p {threads} "
+        "2> {params.stats} "
+        "| samtools view -F4 -bhu - "
+        "| samtools sort -o - alignment/{params.sample}.temp -m 8G "
+        "> {output} && samtools index {output}"
+
+rule umi_rmdup:
+    input:
+        'alignment/{sample}/{sample}.umi.bam'
+    output:
+        'alignment/{sample}/{sample}.bam'
+    shell:
+        'umitools rmdup {input} {output} && '
+        'samtools index {output}'
+
+
+
